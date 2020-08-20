@@ -1,0 +1,6 @@
+.version
+proto
+cmon-plugins.tar.gz
+deps
+.DS_Store
+*.swp

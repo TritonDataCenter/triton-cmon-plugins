@@ -1,0 +1,20 @@
+#!/bin/bash
+
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
+# Copyright 2020 Joyent, Inc.
+
+set -o errexit
+set -o pipefail
+
+if [[ -n "$TRACE" ]]; then
+    export PS4='[\D{%FT%TZ}] ${BASH_SOURCE}:${LINENO}: ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
+    set -o xtrace
+fi
+
+printf '# HELP plugin_zone_count Zone count by state\n'
+printf '# TYPE plugin_zone_count summary\n'
+
+vmadm list -Ho state,zone_state | sort | uniq -c | awk -v "h=$HOSTNAME" '{printf("plugin_zone_count{hostname=\"%s\",state=\"%s\",zone_state=\"%s\"}\t%s\n", h,$2,$3,$1)}'

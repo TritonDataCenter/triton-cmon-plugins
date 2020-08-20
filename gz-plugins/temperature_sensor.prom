@@ -1,0 +1,76 @@
+#!/bin/bash
+
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
+# Copyright 2020 Joyent, Inc.
+
+# See http://dtrace.org/blogs/rm/2019/08/14/cpu-and-pch-temperature-sensors-in-illumos/
+
+set -o errexit
+set -o pipefail
+
+if [[ -n "$TRACE" ]]; then
+    export PS4='[\D{%FT%TZ}] ${BASH_SOURCE}:${LINENO}: ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
+    set -o xtrace
+fi
+
+PATH=$PATH:/usr/lib/fm/fmd
+
+metric='plugin_temperature_sensor'
+
+valid_elements=(
+    bay
+    chassis
+    chip
+    chipset
+    core
+    disk
+    part
+    port
+    procnode
+    revision
+    serial
+    usb-device
+)
+
+default_labels=(
+    "hostname=\"$HOSTNAME\""
+)
+
+function join_labels() {
+    # Force into subshell so it doesn't matter what we do with IFS.
+    ( IFS=, ; echo "$*" )
+}
+
+function getpromlabels () {
+    local fmri="$1"
+    for element in "${valid_elements[@]}"; do
+        regexp="(${element})=([^:/]+)[:/?]"
+        if [[ $fmri =~ $regexp ]]; then
+            printf '%s="%s"\n' "${BASH_REMATCH[1]}" "${BASH_REMATCH[2]}"
+        fi
+    done
+}
+
+function get_reading() {
+        local device="$1"
+        fmtopo -P facility.reading "$device" | awk '/reading/ {print $3}' 2>/dev/null
+}
+
+# shellcheck disable=SC2207
+data=( $(fmtopo '*sensor=temp' | grep ^hc) )
+
+printf '# HELP %s Hardware temperatrue sensors in degrees Celsius\n' "$metric"
+printf '# TYPE %s gauge\n' "$metric"
+
+for resource in "${data[@]}"; do
+    # shellcheck disable=SC2207
+    discovered_labels=( $(getpromlabels "$resource") )
+    label_str=$(join_labels "${default_labels[@]}" "${discovered_labels[@]}")
+    reading=$(get_reading "$resource" 2>/dev/null)
+    if [[ -n $reading ]]; then
+        printf '%s{%s}\t%s\n' "$metric" "$label_str" "$reading"
+    fi
+done
