@@ -41,6 +41,8 @@ deps/go/bin/promtool:
 	sh -c "go get github.com/prometheus/prometheus/cmd/promtool"
 
 check: deps
+	@[[ -d gz-plugins ]] || mkdir gz-plugins
+	@[[ -d vm-plugins ]] || mkdir vm-plugins
 	@sh -c "find gz-plugins vm-plugins -type f -name '*.prom' -exec tools/promlint {} +"
 
 clean:
