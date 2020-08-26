@@ -35,10 +35,6 @@ valid_elements=(
     usb-device
 )
 
-default_labels=(
-    "hostname=\"$HOSTNAME\""
-)
-
 function join_labels() {
     # Force into subshell so it doesn't matter what we do with IFS.
     ( IFS=, ; echo "$*" )
@@ -68,7 +64,7 @@ printf '# TYPE %s gauge\n' "$metric"
 for resource in "${data[@]}"; do
     # shellcheck disable=SC2207
     discovered_labels=( $(getpromlabels "$resource") )
-    label_str=$(join_labels "${default_labels[@]}" "${discovered_labels[@]}")
+    label_str=$(join_labels "${discovered_labels[@]}")
     reading=$(get_reading "$resource" 2>/dev/null)
     if [[ -n $reading ]]; then
         printf '%s{%s}\t%s\n' "$metric" "$label_str" "$reading"
