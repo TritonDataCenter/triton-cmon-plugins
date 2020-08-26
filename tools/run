@@ -1,0 +1,19 @@
+#!/bin/bash
+
+top=$(git rev-parse --show-toplevel)
+export PATH="${top}/mock:${PATH}"
+
+check="$1"
+
+# Did you pass $1?
+: "${check:?}"
+
+if [[ -e "$check" ]]; then
+    "$check"
+elif [[ -e "${top}/gz-plugins/${check}" ]]; then
+    "${top}/gz-plugins/${check}"
+elif [[ -e "${top}/vm-plugins/${check}" ]]; then
+    "${top}/vm-plugins/${check}"
+else
+    exit
+fi
