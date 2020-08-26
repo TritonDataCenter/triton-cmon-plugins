@@ -1,0 +1,13 @@
+#!/bin/bash
+
+# svcs -o state
+cat << EOF
+disabled
+degraded
+legacy_run
+online
+online*
+offline*
+offline
+maintenance
+EOF
