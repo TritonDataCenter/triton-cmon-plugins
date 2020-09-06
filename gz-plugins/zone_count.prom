@@ -15,6 +15,6 @@ if [[ -n "$TRACE" ]]; then
 fi
 
 printf '# HELP plugin_zone_count Zone count by state\n'
-printf '# TYPE plugin_zone_count summary\n'
+printf '# TYPE plugin_zone_count gauge\n'
 
-vmadm list -Ho state,zone_state | sort | uniq -c | awk '{printf("plugin_zone_count{state=\"%s\",zone_state=\"%s\"}\t%s\n", $2,$3,$1)}'
+vmadm list -Ho state,zone_state | sort | uniq -c | awk '{printf("plugin_zone_state{state=\"%s\",zone_state=\"%s\"}\t%s\n", $2,$3,$1)}'

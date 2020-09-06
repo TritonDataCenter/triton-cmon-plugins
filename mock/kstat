@@ -1,0 +1,13 @@
+#!/bin/bash
+
+if [[ "$1" == -j ]]; then
+    shift
+    case "$@" in
+        unix:*:boot_time)
+            printf '[{"module":"unix","instance":0,"name":"system_misc","class":"misc","type":1,"snaptime":4308486.54831974,"data":{"boot_time":1595104221}}]'
+            ;;
+        *)
+            printf '{}'
+            ;;
+    esac
+fi

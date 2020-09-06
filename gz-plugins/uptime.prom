@@ -1,10 +1,8 @@
 #!/bin/bash
 
-export PATH=/usr/node/bin:$PATH
-
 metric='uptime_seconds_total'
 
 printf '# HELP plugin_%s System uptime in seconds\n' "$metric"
 printf '# TYPE plugin_%s counter\n' "$metric"
 printf 'plugin_%s\t' "$metric"
-node -pe 'require("os").uptime()'
+kstat -j unix:::boot_time | json -ae 'this.uptime = Math.floor(Date.now() / 1000) - this.data.boot_time' uptime
