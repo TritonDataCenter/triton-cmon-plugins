@@ -28,7 +28,7 @@ Run these commands from your `headnode`.
     latest=$(curl -s https://api.github.com/repos/joyent/triton-cmon-plugins/releases/latest | json assets.0.browser_download_url)
     curl -o /tmp/cmon-plugins.tar.gz -L "$latest"
     sdc-oneachnode -c -X -g /tmp/cmon-plugins.tar.gz -d /tmp
-    sdc-oneachnode -a 'mkdir -p /opt/custom ; gtar --no-same-owner zxf /tmp/cmon-plugins.targ.z -C /opt/custom'
+    sdc-oneachnode -a 'mkdir -p /opt/custom ; gtar zxf /tmp/cmon-plugins.tar.gz --no-same-owner -C /opt/custom'
 
 ## Using
 
