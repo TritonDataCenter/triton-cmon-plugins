@@ -6,6 +6,9 @@
 
 # Copyright 2020 Joyent, Inc.
 
+case $1 in
+    list)
+        # zone_count.prom
 cat << EOF
 configured        configured
 failed            installed
@@ -14,3 +17,10 @@ running           running
 shutting_down     shutting_down
 stopped           installed
 EOF
+    ;;
+    get)
+        # smf.prom
+        printf '{"brand":"joyent"}' ;;
+    *)
+        exit 0;;
+esac

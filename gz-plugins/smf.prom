@@ -1,0 +1,29 @@
+#!/bin/bash
+
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
+# Copyright 2020 Joyent, Inc.
+
+set -o errexit
+set -o pipefail
+
+if [[ -n "$TRACE" ]]; then
+    export PS4='[\D{%FT%TZ}] ${BASH_SOURCE}:${LINENO}: ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
+    set -o xtrace
+fi
+
+metric='smf_service_state'
+zonename="$1"
+
+# Only run on native zones
+[[ $zonename == global ]] || brand=$(vmadm get "$zonename" | json brand)
+
+if [[ $zonename == global ]] || [[ $brand =~ joyent ]]; then
+    printf '# HELP plugin_%s Zone count by state\n' "$metric"
+    printf '# TYPE plugin_%s gauge\n' "$metric"
+
+    svcs -z "$1" -Ho state | sort | uniq -c |\
+        awk '{printf("plugin_smf_service_state{state=\"%s\"}\t%s\n", $2,$1)}'
+fi
