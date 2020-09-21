@@ -15,20 +15,17 @@ hc://:server-id=headnode/motherboard=0/chip=0/core=0?sensor=temp
   group: facility                       version: 1   stability: Private/Private
     reading           double    64.000000
 
+hc://:server-id=headnode/motherboard=0/chip=0/core=1?sensor=temp
+  group: facility                       version: 1   stability: Private/Private
+    reading           double    72.000000
+
+hc://:server-id=headnode/motherboard=0/chip=0?sensor=temp
+  group: facility                       version: 1   stability: Private/Private
+    reading           double    72.000000
+
+hc://:server-id=headnode/motherboard=0/chipset=0?sensor=temp
+  group: facility                       version: 1   stability: Private/Private
+    reading           double    72.000000
 EOF
 exit
 fi
-
-cat << EOF
-TIME                 UUID
-Aug 20 18:03:17 e7b8d2a7-c534-cd42-e8f3-cbb41ba642f5
-
-hc://:server-id=headnode/motherboard=0/chip=0/core=0?sensor=temp
-
-hc://:server-id=headnode/motherboard=0/chip=0/core=1?sensor=temp
-
-hc://:server-id=headnode/motherboard=0/chip=0?sensor=temp
-
-hc://:server-id=headnode/motherboard=0/chipset=0?sensor=temp
-
-EOF

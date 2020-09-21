@@ -11,6 +11,7 @@
 set -o errexit
 set -o pipefail
 
+# shellcheck disable=SC2154
 if [[ -n "$TRACE" ]]; then
     export PS4='[\D{%FT%TZ}] ${BASH_SOURCE}:${LINENO}: ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
     set -o xtrace
@@ -55,18 +56,31 @@ function get_reading() {
         fmtopo -P facility.reading "$device" | awk '/reading/ {print $3}' 2>/dev/null
 }
 
-# shellcheck disable=SC2207
-data=( $(fmtopo '*sensor=temp' | grep ^hc) )
-
 printf '# HELP %s Hardware temperatrue sensors in degrees Celsius\n' "$metric"
 printf '# TYPE %s gauge\n' "$metric"
 
-for resource in "${data[@]}"; do
-    # shellcheck disable=SC2207
-    discovered_labels=( $(getpromlabels "$resource") )
-    label_str=$(join_labels "${discovered_labels[@]}")
-    reading=$(get_reading "$resource" 2>/dev/null)
-    if [[ -n $reading ]]; then
-        printf '%s{%s}\t%s\n' "$metric" "$label_str" "$reading"
-    fi
+fmtopo -P facility.reading '*sensor=temp' | while IFS='' read -r -u 0 line ; do
+    case "$line" in
+        hc*sensor=temp)
+            # shellcheck disable=SC2207
+            discovered_labels=( $(getpromlabels "$line") )
+            label_str=$(join_labels "${discovered_labels[@]}")
+            ;;
+        *group:*facility*)
+            : 'matched group but nothing to do'
+            ;;
+        *reading*)
+            : "matched reading"
+            read -r -a val <<< "$line"
+            reading="${val[2]}"
+                if [[ -n $reading ]]; then
+                    printf '%s{%s}\t%s\n' "$metric" "$label_str" "$reading"
+                fi
+            ;;
+        *)
+            # We're outside of a stanza, so clear this out
+            discovered_labels=()
+            label_str=''
+            ;;
+        esac
 done
