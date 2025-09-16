@@ -51,10 +51,21 @@ Prefer making plugins with `.prom` extension so that they can be checked with
 
 Before committing, your plugin should be lint clean with whatever language you
 used to develop it (e.g., `jsvascriptlint`, `shellcheck`, `clippy`) and pass
-`make check` which lints plugin output. If you use external commands that may
-not be present or functional in a development environment, or may be dangerous
-to run (for whatever reason...), also create an appropriate `mock` tool to
-simulate its output for use with `make check`.
+`make check` which lints plugin output. 
+
+### Prerequisites for Development
+
+To use `make check`, you'll need `promtool` installed in your PATH. Since `go get` 
+outside of a module is deprecated, install it manually:
+
+    go install github.com/prometheus/prometheus/cmd/promtool@latest
+
+See: https://pkg.go.dev/github.com/prometheus/prometheus/cmd/promtool
+
+If you use external commands that may not be present or functional in a 
+development environment, or may be dangerous to run (for whatever reason...), 
+also create an appropriate `mock` tool to simulate its output for use with 
+`make check`.
 
 [agent-docs]: https://github.com/joyent/triton-cmon-agent/tree/master/docs#plugins
 

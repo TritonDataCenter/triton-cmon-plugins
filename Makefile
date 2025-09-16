@@ -4,8 +4,7 @@
 
 # Copyright 2025 Edgecast Cloud LLC.
 
-export GOPATH   = $(PWD)/deps/go
-export PATH    := $(PWD)/mock:$(GOPATH)/bin:$(PATH)
+export PATH    := $(PWD)/mock:$(PATH)
 export COPYFILE_DISABLE=true
 
 PREFIX          = cmon
@@ -17,7 +16,7 @@ ALL_PLUGINS     = $(shell find gz-plugins vm-plugins -type f)
 VERSION         = $(shell git tag --sort=taggerdate | tail -1)
 GITREV          = $(shell git rev-parse HEAD 2>/dev/null)
 
-.PHONY: all check clean deps mrclean version
+.PHONY: all check clean mrclean version
 
 all: cmon-plugins.tar.gz
 
@@ -34,13 +33,7 @@ $(ARCHIVE): .version
 release: clean .version $(ARCHIVE)
 	hub release create -d -a $(ARCHIVE) $(VERSION)
 
-deps: deps/go/bin/promtool
-
-deps/go/bin/promtool:
-	@mkdir -p $(GOPATH)
-	sh -c "go get github.com/prometheus/prometheus/cmd/promtool"
-
-check: deps
+check:
 	@[[ -d gz-plugins ]] || mkdir gz-plugins
 	@[[ -d vm-plugins ]] || mkdir vm-plugins
 	@sh -c "find gz-plugins vm-plugins -type f -name '*.prom' -exec tools/promlint {} +"
