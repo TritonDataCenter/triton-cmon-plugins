@@ -11,9 +11,7 @@
 
 These plugins are for the [Triton][triton] [Container Monitor][cmon] system.
 
-These are unofficial. They are used in Edgecast's production infrastructure but
-may or may not work with your system. A valid workaround for you might be to
-install to an alternate location and symlink the plug-ins you wish to use.
+These are unofficial. They were previously used in Joyent's production infrastructure, and given new life in Edgecast's production infrastructure. These plugins may or may not work with your systems. A valid workaround for you might be to install to an alternate location and symlink the plug-ins you wish to use.
 
 [triton]: https://github.com/tritondatacenter/triton
 [cmon]: https://github.com/tritondatacenter/triton-cmon
