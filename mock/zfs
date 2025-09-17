@@ -4,13 +4,15 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-# Copyright 2020 Joyent, Inc.
 # Copyright 2025 Edgecast Cloud LLC.
 
-set -o errexit
-set -o pipefail
-
-for i in "$@"; do
-    echo "Checking $i"
-    $i | promtool check metrics
-done
+case "$1 $2" in
+    "list -Hpo")
+        # zones_dataset.prom
+        if [[ "$5" == "zones" ]]; then
+            printf "5314993440578\t250041612478\t0\n"
+        fi
+    ;;
+    *)
+        exit 0;;
+esac

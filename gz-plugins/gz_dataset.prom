@@ -1,0 +1,48 @@
+#!/bin/bash
+
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
+# Copyright 2025 Edgecast Cloud LLC.
+
+set -o errexit
+set -o pipefail
+
+# shellcheck disable=SC2154
+if [[ -n "$TRACE" ]]; then
+    export PS4='[\D{%FT%TZ}] ${BASH_SOURCE}:${LINENO}: ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
+    set -o xtrace
+fi
+
+# Get zones dataset usage information including quota
+zfs_output=$(zfs list -Hpo used,available,quota zones 2>/dev/null)
+
+# shellcheck disable=SC2181
+if [ $? -ne 0 ]; then
+    # If zfs command fails, display nothing
+    exit 0
+fi
+
+# Parse the output (tab-separated: used available quota)
+used=$(echo "$zfs_output" | cut -f1)
+available=$(echo "$zfs_output" | cut -f2)
+quota=$(echo "$zfs_output" | cut -f3)
+
+# Calculate effective quota
+if [ "$quota" = "-" ] || [ "$quota" = "0" ]; then
+    # If no quota, use used + available as effective quota
+    quota=$((used + available))
+fi
+
+printf '# HELP zfs_used ZFS space used by zones dataset in bytes\n'
+printf '# TYPE zfs_used gauge\n'
+printf 'zfs_used\t%d\n' "$used"
+
+printf '# HELP zfs_quota ZFS quota for zones dataset in bytes\n'
+printf '# TYPE zfs_quota gauge\n'
+printf 'zfs_quota\t%d\n' "$quota"
+
+printf '# HELP zfs_available ZFS space available to zones dataset in bytes\n'
+printf '# TYPE zfs_available gauge\n'
+printf 'zfs_available\t%d\n' "$available"

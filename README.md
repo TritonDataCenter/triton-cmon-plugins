@@ -4,18 +4,17 @@
 
 <!--
    - Copyright 2020 Joyent, Inc.
+   - Copyright 2025 Edgecast Cloud LLC.
    -->
 
 # triton-cmon-plugins
 
 These plugins are for the [Triton][triton] [Container Monitor][cmon] system.
 
-These are unofficial. They are used in Joyent's production infrastructure but
-may or may not work with your system. A valid workaround for you might be to
-install to an alternate location and symlink the plug-ins you wish to use.
+These are unofficial. They were previously used in Joyent's production infrastructure, and given new life in Edgecast's production infrastructure. These plugins may or may not work with your systems. A valid workaround for you might be to install to an alternate location and symlink the plug-ins you wish to use.
 
-[triton]: https://github.com/joyent/triton
-[cmon]: https://github.com/joyent/triton-cmon
+[triton]: https://github.com/tritondatacenter/triton
+[cmon]: https://github.com/tritondatacenter/triton-cmon
 
 ## Installing
 
@@ -25,7 +24,7 @@ nodes, and extract it to `/opt/custom/cmon`.
 Run these commands from your `headnode`.
 
     mkdir -p /opt/custom
-    latest=$(curl -s https://api.github.com/repos/joyent/triton-cmon-plugins/releases/latest | json assets.0.browser_download_url)
+    latest=$(curl -s https://api.github.com/repos/tritondatacenter/triton-cmon-plugins/releases/latest | json assets.0.browser_download_url)
     curl -o /tmp/cmon-plugins.tar.gz -L "$latest"
     sdc-oneachnode -c -X -g /tmp/cmon-plugins.tar.gz -d /tmp
     sdc-oneachnode -a 'mkdir -p /opt/custom ; gtar zxf /tmp/cmon-plugins.tar.gz --no-same-owner -C /opt/custom'
@@ -51,10 +50,21 @@ Prefer making plugins with `.prom` extension so that they can be checked with
 
 Before committing, your plugin should be lint clean with whatever language you
 used to develop it (e.g., `jsvascriptlint`, `shellcheck`, `clippy`) and pass
-`make check` which lints plugin output. If you use external commands that may
-not be present or functional in a development environment, or may be dangerous
-to run (for whatever reason...), also create an appropriate `mock` tool to
-simulate its output for use with `make check`.
+`make check` which lints plugin output. 
+
+### Prerequisites for Development
+
+To use `make check`, you'll need `promtool` installed in your PATH. Since `go get` 
+outside of a module is deprecated, install it manually:
+
+    go install github.com/prometheus/prometheus/cmd/promtool@latest
+
+See: https://pkg.go.dev/github.com/prometheus/prometheus/cmd/promtool
+
+If you use external commands that may not be present or functional in a 
+development environment, or may be dangerous to run (for whatever reason...), 
+also create an appropriate `mock` tool to simulate its output for use with 
+`make check`.
 
 [agent-docs]: https://github.com/joyent/triton-cmon-agent/tree/master/docs#plugins
 
