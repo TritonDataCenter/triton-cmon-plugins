@@ -35,6 +35,7 @@ if [ "$quota" = "-" ] || [ "$quota" = "0" ]; then
     quota=$((used + available))
 fi
 
+printf "# OPTION ttl 300"
 printf '# HELP zfs_used ZFS space used by zones dataset in bytes\n'
 printf '# TYPE zfs_used gauge\n'
 printf 'zfs_used\t%d\n' "$used"
