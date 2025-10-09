@@ -1,0 +1,8 @@
+#!/bin/bash
+
+if [[ "$1" == "-l" ]]; then
+    cat <<EOF
+swapfile             dev    swaplo   blocks     free
+/dev/zvol/dsk/zones/swap 90,1         8 803209208 800918720
+EOF
+fi

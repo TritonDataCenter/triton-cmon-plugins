@@ -7,21 +7,34 @@
 # Copyright 2020 Joyent, Inc.
 # Copyright 2025 Edgecast Cloud LLC.
 
-case $1 in
+case "$1" in
     list)
-        # zone_count.prom
-cat << EOF
-configured        configured
-failed            installed
-incomplete        incomplete
-running           running
-shutting_down     shutting_down
-stopped           installed
-EOF
-    ;;
+        if [[ "$2" == "-H" ]]; then
+            # Output parseable list of zone UUIDs
+            cat <<INNEREOF
+f62b0465-d232-4a17-b312-25319236995c
+INNEREOF
+        fi
+        ;;
     get)
-        # smf.prom
-        printf '{"brand":"joyent"}' ;;
-    *)
-        exit 0;;
+        uuid="$2"
+        if [[ "$uuid" == "f62b0465-d232-4a17-b312-25319236995c" ]]; then
+            cat <<'INNEREOF'
+{
+  "uuid": "f62b0465-d232-4a17-b312-25319236995c",
+  "brand": "bhyve",
+  "state": "running",
+  "alias": "primarycache_test",
+  "ram": 65280,
+  "vcpus": 16,
+  "quota": 1,
+  "flexible_disk_size": 614400,
+  "max_swap": 130560,
+  "max_lwps": 4000,
+  "billing_id": "d65e3afd-c024-42a5-97d9-a50ad2f300c0",
+  "owner_uuid": "7a53ef65-3ed6-400b-a66a-e200df261ec9"
+}
+INNEREOF
+        fi
+        ;;
 esac

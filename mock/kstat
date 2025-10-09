@@ -10,4 +10,97 @@ if [[ "$1" == -j ]]; then
             printf '{}'
             ;;
     esac
+elif [[ "$1" == -p ]]; then
+    shift
+    # Handle -p (parseable) output for various kstat queries
+    case "$@" in
+        # Memory stats
+        unix:0:system_pages:physmem|unix:0:system_pages:freemem|unix:0:system_pages:availrmem)
+            cat <<EOF
+unix:0:system_pages:physmem	100313289
+unix:0:system_pages:freemem	41088663
+unix:0:system_pages:availrmem	41306442
+EOF
+            ;;
+        'cpu:::pgpgin')
+            # Simulate per-CPU pgpgin stats
+            for i in {0..3}; do
+                echo "cpu:${i}:vm:pgpgin	$((5000 + i * 100))"
+            done
+            ;;
+        'cpu:::pgpgout')
+            # Simulate per-CPU pgpgout stats
+            for i in {0..3}; do
+                echo "cpu:${i}:vm:pgpgout	$((1000 + i * 50))"
+            done
+            ;;
+        'cpu:::pgscan')
+            # Simulate per-CPU pgscan stats
+            for i in {0..3}; do
+                echo "cpu:${i}:vm:pgscan	0"
+            done
+            ;;
+        # Network stats for igb0
+        link::igb0:*)
+            cat <<EOF
+link:0:igb0:rbytes64	10124765017255
+link:0:igb0:obytes64	6987234605
+link:0:igb0:ipackets64	29472455016
+link:0:igb0:opackets64	20633924
+link:0:igb0:ierrors	7
+link:0:igb0:oerrors	0
+link:0:igb0:norcvbuf	21
+link:0:igb0:noxmtbuf	0
+link:0:igb0:ifspeed	1000000000
+link:0:igb0:link_state	1
+EOF
+            ;;
+        # Network stats for cxgbe0
+        link::cxgbe0:*)
+            cat <<EOF
+link:0:cxgbe0:rbytes64	0
+link:0:cxgbe0:obytes64	80876315
+link:0:cxgbe0:ipackets64	0
+link:0:cxgbe0:opackets64	869638
+link:0:cxgbe0:ierrors	0
+link:0:cxgbe0:oerrors	0
+link:0:cxgbe0:norcvbuf	0
+link:0:cxgbe0:noxmtbuf	0
+link:0:cxgbe0:ifspeed	0
+link:0:cxgbe0:link_state	0
+EOF
+            ;;
+        # Disk I/O stats for blkdev
+        blkdev:*:*:nread\ blkdev:*:*:nwritten\ blkdev:*:*:reads\ blkdev:*:*:writes\ blkdev:*:*:rtime\ blkdev:*:*:wtime)
+            cat <<EOF
+blkdev:0:blkdev0:nread	389529783296
+blkdev:1:blkdev1:nread	437561932800
+blkdev:2:blkdev2:nread	437876137472
+blkdev:3:blkdev3:nread	389272784384
+blkdev:0:blkdev0:nwritten	14776664804352
+blkdev:1:blkdev1:nwritten	14956815625216
+blkdev:2:blkdev2:nwritten	14956738658816
+blkdev:3:blkdev3:nwritten	14777321883648
+blkdev:0:blkdev0:reads	277341335
+blkdev:1:blkdev1:reads	330082970
+blkdev:2:blkdev2:reads	329973843
+blkdev:3:blkdev3:reads	276757149
+blkdev:0:blkdev0:writes	1502017154
+blkdev:1:blkdev1:writes	1601856559
+blkdev:2:blkdev2:writes	1600811614
+blkdev:3:blkdev3:writes	1501687120
+blkdev:0:blkdev0:rtime	57632862491066
+blkdev:1:blkdev1:rtime	60898750845620
+blkdev:2:blkdev2:rtime	60922987082089
+blkdev:3:blkdev3:rtime	57679800863083
+blkdev:0:blkdev0:wtime	562675015111
+blkdev:1:blkdev1:wtime	579166640342
+blkdev:2:blkdev2:wtime	604246817372
+blkdev:3:blkdev3:wtime	558229047747
+EOF
+            ;;
+        *)
+            # Return empty for unknown queries
+            ;;
+    esac
 fi
