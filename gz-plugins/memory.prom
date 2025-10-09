@@ -1,0 +1,104 @@
+#!/bin/bash
+
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
+# Copyright 2025 Edgecast Cloud LLC.
+
+set -o errexit
+set -o pipefail
+
+# shellcheck disable=SC2154
+if [[ -n "$TRACE" ]]; then
+    export PS4='[\D{%FT%TZ}] ${BASH_SOURCE}:${LINENO}: ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
+    set -o xtrace
+fi
+
+# Get system page size (typically 4096 bytes on x86_64)
+pagesize=$(pagesize 2>/dev/null || echo 4096)
+
+# Get memory statistics from kstat
+memory_stats=$(kstat -p unix:0:system_pages:physmem \
+                        unix:0:system_pages:freemem \
+                        unix:0:system_pages:availrmem 2>/dev/null || true)
+
+# shellcheck disable=SC2181
+if [ -z "$memory_stats" ]; then
+    # If kstat fails, exit silently
+    exit 0
+fi
+
+# Parse memory statistics
+physmem=$(echo "$memory_stats" | grep 'physmem' | awk '{print $2}')
+freemem=$(echo "$memory_stats" | grep 'freemem' | awk '{print $2}')
+availrmem=$(echo "$memory_stats" | grep 'availrmem' | awk '{print $2}')
+
+# Convert pages to bytes
+total_bytes=$((physmem * pagesize))
+free_bytes=$((freemem * pagesize))
+available_bytes=$((availrmem * pagesize))
+
+# Physical Memory metrics
+printf '# HELP cn_memory_total_bytes Total physical memory in bytes\n'
+printf '# TYPE cn_memory_total_bytes gauge\n'
+printf 'cn_memory_total_bytes\t%d\n' "$total_bytes"
+
+printf '# HELP cn_memory_free_bytes Free physical memory in bytes\n'
+printf '# TYPE cn_memory_free_bytes gauge\n'
+printf 'cn_memory_free_bytes\t%d\n' "$free_bytes"
+
+printf '# HELP cn_memory_available_bytes Available memory (free + reclaimable) in bytes\n'
+printf '# TYPE cn_memory_available_bytes gauge\n'
+printf 'cn_memory_available_bytes\t%d\n' "$available_bytes"
+
+# Get paging statistics - sum across all CPUs
+pgpgin_total=$(kstat -p 'cpu:::pgpgin' 2>/dev/null | awk '{sum += $2} END {print sum}' || echo 0)
+pgpgout_total=$(kstat -p 'cpu:::pgpgout' 2>/dev/null | awk '{sum += $2} END {print sum}' || echo 0)
+pgscan_total=$(kstat -p 'cpu:::pgscan' 2>/dev/null | awk '{sum += $2} END {print sum}' || echo 0)
+
+# Paging Activity metrics (counters)
+printf '# HELP cn_memory_pgpgin_total Pages paged in since boot\n'
+printf '# TYPE cn_memory_pgpgin_total counter\n'
+printf 'cn_memory_pgpgin_total\t%d\n' "$pgpgin_total"
+
+printf '# HELP cn_memory_pgpgout_total Pages paged out since boot\n'
+printf '# TYPE cn_memory_pgpgout_total counter\n'
+printf 'cn_memory_pgpgout_total\t%d\n' "$pgpgout_total"
+
+printf '# HELP cn_memory_scan_rate Page scan rate\n'
+printf '# TYPE cn_memory_scan_rate gauge\n'
+printf 'cn_memory_scan_rate\t%d\n' "$pgscan_total"
+
+# Get swap information
+swap_info=$(swap -l 2>/dev/null | tail -n +2 || true)
+
+if [ -n "$swap_info" ]; then
+    # Parse swap output (columns: swapfile, dev, swaplo, blocks, free)
+    # blocks and free are in 512-byte blocks
+    total_blocks=$(echo "$swap_info" | awk '{sum += $4} END {print sum}')
+    free_blocks=$(echo "$swap_info" | awk '{sum += $5} END {print sum}')
+
+    # Convert 512-byte blocks to bytes
+    swap_total_bytes=$((total_blocks * 512))
+    swap_free_bytes=$((free_blocks * 512))
+    swap_used_bytes=$((swap_total_bytes - swap_free_bytes))
+else
+    # No swap configured
+    swap_total_bytes=0
+    swap_free_bytes=0
+    swap_used_bytes=0
+fi
+
+# Swap metrics
+printf '# HELP cn_swap_total_bytes Total swap space in bytes\n'
+printf '# TYPE cn_swap_total_bytes gauge\n'
+printf 'cn_swap_total_bytes\t%d\n' "$swap_total_bytes"
+
+printf '# HELP cn_swap_used_bytes Used swap space in bytes\n'
+printf '# TYPE cn_swap_used_bytes gauge\n'
+printf 'cn_swap_used_bytes\t%d\n' "$swap_used_bytes"
+
+printf '# HELP cn_swap_free_bytes Free swap space in bytes\n'
+printf '# TYPE cn_swap_free_bytes gauge\n'
+printf 'cn_swap_free_bytes\t%d\n' "$swap_free_bytes"
