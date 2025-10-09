@@ -99,6 +99,22 @@ blkdev:2:blkdev2:wtime	604246817372
 blkdev:3:blkdev3:wtime	558229047747
 EOF
             ;;
+        # CPU detailed stats
+        cpu:*:sys:cpu_nsec_user\ cpu:*:sys:cpu_nsec_kernel\ cpu:*:sys:cpu_nsec_idle\ cpu:*:sys:cpu_nsec_intr\ cpu_info:*:*:brand\ cpu_info:*:*:chip_id\ cpu_info:*:*:clock_MHz)
+            cat <<EOF
+cpu:0:sys:cpu_nsec_user	7326456308695
+cpu:0:sys:cpu_nsec_kernel	1877507985198904
+cpu:0:sys:cpu_nsec_idle	26229660692366987
+cpu:0:sys:cpu_nsec_intr	389538951623046
+cpu:1:sys:cpu_nsec_user	11018641825081
+cpu:1:sys:cpu_nsec_kernel	2125097698381843
+cpu:1:sys:cpu_nsec_idle	25978378216194415
+cpu:1:sys:cpu_nsec_intr	45670462161110
+cpu_info:0:cpu_info0:brand	Intel(r) Xeon(r) Gold 6230 CPU @ 2.10GHz
+cpu_info:0:cpu_info0:chip_id	0
+cpu_info:0:cpu_info0:clock_MHz	2100
+EOF
+            ;;
         *)
             # Return empty for unknown queries
             ;;
