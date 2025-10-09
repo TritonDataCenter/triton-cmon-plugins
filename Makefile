@@ -34,6 +34,9 @@ $(ARCHIVE): .version
 release: clean .version $(ARCHIVE)
 	hub release create -d -a $(ARCHIVE) $(VERSION)
 
+release-gh-cli: clean .version $(ARCHIVE)
+	gh release create $(VERSION) $(ARCHIVE) --draft
+
 check:
 	@[[ -d gz-plugins ]] || mkdir gz-plugins
 	@[[ -d vm-plugins ]] || mkdir vm-plugins
