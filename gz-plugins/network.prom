@@ -1,0 +1,133 @@
+#!/bin/bash
+
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
+# Copyright 2025 Edgecast Cloud LLC.
+
+set -o errexit
+set -o pipefail
+
+# shellcheck disable=SC2154
+if [[ -n "$TRACE" ]]; then
+    export PS4='[\D{%FT%TZ}] ${BASH_SOURCE}:${LINENO}: ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
+    set -o xtrace
+fi
+
+# Get list of physical interfaces
+phys_interfaces=$(dladm show-phys -p -o LINK 2>/dev/null || true)
+
+# shellcheck disable=SC2181
+if [ -z "$phys_interfaces" ]; then
+    # If dladm fails, exit silently
+    exit 0
+fi
+
+# Process each physical interface
+for interface in $phys_interfaces; do
+    # Get network statistics from kstat
+    stats=$(kstat -p "link::${interface}:rbytes64" \
+                     "link::${interface}:obytes64" \
+                     "link::${interface}:ipackets64" \
+                     "link::${interface}:opackets64" \
+                     "link::${interface}:ierrors" \
+                     "link::${interface}:oerrors" \
+                     "link::${interface}:norcvbuf" \
+                     "link::${interface}:noxmtbuf" \
+                     "link::${interface}:ifspeed" \
+                     "link::${interface}:link_state" 2>/dev/null || true)
+
+    if [ -z "$stats" ]; then
+        continue
+    fi
+
+    # Parse statistics
+    rbytes=$(echo "$stats" | grep 'rbytes64' | awk '{print $2}')
+    obytes=$(echo "$stats" | grep 'obytes64' | awk '{print $2}')
+    ipackets=$(echo "$stats" | grep 'ipackets64' | awk '{print $2}')
+    opackets=$(echo "$stats" | grep 'opackets64' | awk '{print $2}')
+    ierrors=$(echo "$stats" | grep 'ierrors' | awk '{print $2}')
+    oerrors=$(echo "$stats" | grep 'oerrors' | awk '{print $2}')
+    norcvbuf=$(echo "$stats" | grep 'norcvbuf' | awk '{print $2}')
+    noxmtbuf=$(echo "$stats" | grep 'noxmtbuf' | awk '{print $2}')
+    ifspeed=$(echo "$stats" | grep 'ifspeed' | awk '{print $2}')
+    link_state=$(echo "$stats" | grep 'link_state' | awk '{print $2}')
+
+    # Convert link_state (1=up, 0=down)
+    link_up=$link_state
+
+    # Convert ifspeed from bits/sec to bytes/sec (like node_exporter)
+    speed_bytes=$((ifspeed / 8))
+
+    # Output metrics with interface label
+    # Only output HELP and TYPE once
+    if [ "$interface" = "$(echo "$phys_interfaces" | head -1)" ]; then
+        printf '# HELP cn_network_receive_bytes_total Network bytes received on interface\n'
+        printf '# TYPE cn_network_receive_bytes_total counter\n'
+    fi
+    printf 'cn_network_receive_bytes_total{interface="%s"}\t%d\n' "$interface" "$rbytes"
+
+    if [ "$interface" = "$(echo "$phys_interfaces" | head -1)" ]; then
+        printf '# HELP cn_network_transmit_bytes_total Network bytes transmitted on interface\n'
+        printf '# TYPE cn_network_transmit_bytes_total counter\n'
+    fi
+    printf 'cn_network_transmit_bytes_total{interface="%s"}\t%d\n' "$interface" "$obytes"
+
+    if [ "$interface" = "$(echo "$phys_interfaces" | head -1)" ]; then
+        printf '# HELP cn_network_receive_packets_total Network packets received on interface\n'
+        printf '# TYPE cn_network_receive_packets_total counter\n'
+    fi
+    printf 'cn_network_receive_packets_total{interface="%s"}\t%d\n' "$interface" "$ipackets"
+
+    if [ "$interface" = "$(echo "$phys_interfaces" | head -1)" ]; then
+        printf '# HELP cn_network_transmit_packets_total Network packets transmitted on interface\n'
+        printf '# TYPE cn_network_transmit_packets_total counter\n'
+    fi
+    printf 'cn_network_transmit_packets_total{interface="%s"}\t%d\n' "$interface" "$opackets"
+
+    if [ "$interface" = "$(echo "$phys_interfaces" | head -1)" ]; then
+        printf '# HELP cn_network_receive_errors_total Network receive errors on interface\n'
+        printf '# TYPE cn_network_receive_errors_total counter\n'
+    fi
+    printf 'cn_network_receive_errors_total{interface="%s"}\t%d\n' "$interface" "$ierrors"
+
+    if [ "$interface" = "$(echo "$phys_interfaces" | head -1)" ]; then
+        printf '# HELP cn_network_transmit_errors_total Network transmit errors on interface\n'
+        printf '# TYPE cn_network_transmit_errors_total counter\n'
+    fi
+    printf 'cn_network_transmit_errors_total{interface="%s"}\t%d\n' "$interface" "$oerrors"
+
+    if [ "$interface" = "$(echo "$phys_interfaces" | head -1)" ]; then
+        printf '# HELP cn_network_receive_drops_total Network receive buffer drops on interface\n'
+        printf '# TYPE cn_network_receive_drops_total counter\n'
+    fi
+    printf 'cn_network_receive_drops_total{interface="%s"}\t%d\n' "$interface" "$norcvbuf"
+
+    if [ "$interface" = "$(echo "$phys_interfaces" | head -1)" ]; then
+        printf '# HELP cn_network_transmit_drops_total Network transmit buffer drops on interface\n'
+        printf '# TYPE cn_network_transmit_drops_total counter\n'
+    fi
+    printf 'cn_network_transmit_drops_total{interface="%s"}\t%d\n' "$interface" "$noxmtbuf"
+
+    if [ "$interface" = "$(echo "$phys_interfaces" | head -1)" ]; then
+        printf '# HELP cn_network_link_speed_bytes Network interface link speed in bytes per second\n'
+        printf '# TYPE cn_network_link_speed_bytes gauge\n'
+    fi
+    printf 'cn_network_link_speed_bytes{interface="%s"}\t%d\n' "$interface" "$speed_bytes"
+
+    if [ "$interface" = "$(echo "$phys_interfaces" | head -1)" ]; then
+        printf '# HELP cn_network_link_up Network interface link status (1=up, 0=down)\n'
+        printf '# TYPE cn_network_link_up gauge\n'
+    fi
+    printf 'cn_network_link_up{interface="%s"}\t%d\n' "$interface" "$link_up"
+done
+
+# Count VNICs (excluding header line)
+vnic_total=$(dladm show-vnic 2>/dev/null | tail -n +2 | wc -l || echo 0)
+# Trim whitespace
+vnic_total=$(echo "$vnic_total" | tr -d ' ')
+
+printf '# HELP cn_network_vnics Total number of VNICs configured\n'
+printf '# TYPE cn_network_vnics gauge\n'
+printf 'cn_network_vnics\t%d\n' "$vnic_total"
