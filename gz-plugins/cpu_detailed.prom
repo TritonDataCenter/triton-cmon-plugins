@@ -1,0 +1,86 @@
+#!/bin/bash
+
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
+# Copyright 2025 Edgecast Cloud LLC.
+
+set -o errexit
+set -o pipefail
+
+# shellcheck disable=SC2154
+if [[ -n "$TRACE" ]]; then
+    export PS4='[\D{%FT%TZ}] ${BASH_SOURCE}:${LINENO}: ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
+    set -o xtrace
+fi
+
+# Get per-CPU time statistics and CPU info
+cpu_stats=$(kstat -p 'cpu:*:sys:cpu_nsec_user' \
+                      'cpu:*:sys:cpu_nsec_kernel' \
+                      'cpu:*:sys:cpu_nsec_idle' \
+                      'cpu:*:sys:cpu_nsec_intr' \
+                      'cpu_info:*:*:brand' \
+                      'cpu_info:*:*:chip_id' \
+                      'cpu_info:*:*:clock_MHz' 2>/dev/null || true)
+
+# shellcheck disable=SC2181
+if [ -z "$cpu_stats" ]; then
+    # If kstat fails, exit silently
+    exit 0
+fi
+
+# Get list of CPU IDs
+cpu_ids=$(echo "$cpu_stats" | grep 'cpu_nsec_user' | cut -d: -f2 | sort -n | uniq)
+
+# Output per-core CPU time metrics
+printf '# HELP cn_cpu_core_user_seconds_total CPU time spent in user mode per core\n'
+printf '# TYPE cn_cpu_core_user_seconds_total counter\n'
+for cpu_id in $cpu_ids; do
+    nsec=$(echo "$cpu_stats" | grep "^cpu:${cpu_id}:sys:cpu_nsec_user" | awk '{print $2}')
+    if [ -n "$nsec" ]; then
+        seconds=$(awk "BEGIN {printf \"%.9f\", $nsec / 1000000000}")
+        printf 'cn_cpu_core_user_seconds_total{core="%s"}\t%s\n' "$cpu_id" "$seconds"
+    fi
+done
+
+printf '# HELP cn_cpu_core_system_seconds_total CPU time spent in system mode per core\n'
+printf '# TYPE cn_cpu_core_system_seconds_total counter\n'
+for cpu_id in $cpu_ids; do
+    nsec=$(echo "$cpu_stats" | grep "^cpu:${cpu_id}:sys:cpu_nsec_kernel" | awk '{print $2}')
+    if [ -n "$nsec" ]; then
+        seconds=$(awk "BEGIN {printf \"%.9f\", $nsec / 1000000000}")
+        printf 'cn_cpu_core_system_seconds_total{core="%s"}\t%s\n' "$cpu_id" "$seconds"
+    fi
+done
+
+printf '# HELP cn_cpu_core_idle_seconds_total CPU time spent idle per core\n'
+printf '# TYPE cn_cpu_core_idle_seconds_total counter\n'
+for cpu_id in $cpu_ids; do
+    nsec=$(echo "$cpu_stats" | grep "^cpu:${cpu_id}:sys:cpu_nsec_idle" | awk '{print $2}')
+    if [ -n "$nsec" ]; then
+        seconds=$(awk "BEGIN {printf \"%.9f\", $nsec / 1000000000}")
+        printf 'cn_cpu_core_idle_seconds_total{core="%s"}\t%s\n' "$cpu_id" "$seconds"
+    fi
+done
+
+printf '# HELP cn_cpu_core_interrupt_seconds_total CPU time spent servicing interrupts per core\n'
+printf '# TYPE cn_cpu_core_interrupt_seconds_total counter\n'
+for cpu_id in $cpu_ids; do
+    nsec=$(echo "$cpu_stats" | grep "^cpu:${cpu_id}:sys:cpu_nsec_intr" | awk '{print $2}')
+    if [ -n "$nsec" ]; then
+        seconds=$(awk "BEGIN {printf \"%.9f\", $nsec / 1000000000}")
+        printf 'cn_cpu_core_interrupt_seconds_total{core="%s"}\t%s\n' "$cpu_id" "$seconds"
+    fi
+done
+
+# Output CPU info metrics (only need to output once, use cpu 0)
+brand=$(echo "$cpu_stats" | grep "^cpu_info:0:" | grep ':brand' | cut -f2-)
+chip_id=$(echo "$cpu_stats" | grep "^cpu_info:0:" | grep ':chip_id' | awk '{print $2}')
+clock_mhz=$(echo "$cpu_stats" | grep "^cpu_info:0:" | grep ':clock_MHz' | awk '{print $2}')
+
+if [ -n "$brand" ] && [ -n "$chip_id" ] && [ -n "$clock_mhz" ]; then
+    printf '# HELP cn_cpu_info CPU information\n'
+    printf '# TYPE cn_cpu_info gauge\n'
+    printf 'cn_cpu_info{brand="%s",chip_id="%s",clock_mhz="%s"}\t1\n' "$brand" "$chip_id" "$clock_mhz"
+fi
