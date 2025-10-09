@@ -14,7 +14,7 @@ case "$1" in
             cat <<INNEREOF
 f62b0465-d232-4a17-b312-25319236995c
 INNEREOF
-        elif [[ "$2" == "-p" ]]
+        elif [[ "$2" == "-p" ]]; then
             cat <<INNEREOF
 1f4204e6-03a4-4096-9db8-f84f1b5b4b8d:dev-webserver:bhyve:running:4096:1:1:38912:8192:4000:75fe7c5c-c2b4-4fc9-b5f5-c4f69b37d32f:01f842b9-6415-4b92-89e5-f35bdd52150c
 a83d6dcb-ee7f-41bd-9ee9-0b9577f9b999:em7h1fewref3w-lb-f7xm3yg3shde-nvka:joyent:running:4096::50::8192:8192:5e74772d-8663-491f-90dd-1bf7b1939f45:1bfca979-16d4-49d7-90db-cb70fc1da870
@@ -26,6 +26,7 @@ aa69a499-dd8e-4459-8bfc-4899c94bab14:piranha-portal-aa69a499:joyent:running:4096
 b32f777c-acf0-46bb-933e-e25807f039c3:1a-k8s-dev-6:bhyve:running:32768:8:1:307200:131072:4000:c12804a4-7acc-4cf2-841c-0ec55a8ae7c7:3a666c03-1be7-49a7-95fb-a0342de88504
 8c0b84f5-a9e8-4428-8c0c-c02f2cf2ed3b:gptxfsfgphz58-0wb2w-da11-prod-pool-1:bhyve:running:65280:16:1:614400:130560:4000:d65e3afd-c024-42a5-97d9-a50ad2f300c0:be8063ec-8367-480a-89dc-30149f85aafb
 INNEREOF
+
         fi
         ;;
     get)
