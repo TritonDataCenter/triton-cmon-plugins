@@ -115,6 +115,24 @@ cpu_info:0:cpu_info0:chip_id	0
 cpu_info:0:cpu_info0:clock_MHz	2100
 EOF
             ;;
+        # Load average and process stats
+        unix:0:system_misc:avenrun_1min\ unix:0:system_misc:avenrun_5min\ unix:0:system_misc:avenrun_15min\ unix:0:system_misc:nproc)
+            cat <<EOF
+unix:0:system_misc:avenrun_1min	119
+unix:0:system_misc:avenrun_5min	132
+unix:0:system_misc:avenrun_15min	129
+unix:0:system_misc:nproc	99
+EOF
+            ;;
+        # Context switches and interrupts
+        cpu:::pswitch\ cpu:::intr)
+            cat <<EOF
+cpu:0:sys:pswitch	15948540179
+cpu:1:sys:pswitch	21217703240
+cpu:0:sys:intr	71443655663
+cpu:1:sys:intr	45670462161
+EOF
+            ;;
         *)
             # Return empty for unknown queries
             ;;

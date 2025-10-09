@@ -1,0 +1,90 @@
+#!/bin/bash
+
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
+# Copyright 2025 Edgecast Cloud LLC.
+
+set -o errexit
+set -o pipefail
+
+# shellcheck disable=SC2154
+if [[ -n "$TRACE" ]]; then
+    export PS4='[\D{%FT%TZ}] ${BASH_SOURCE}:${LINENO}: ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
+    set -o xtrace
+fi
+
+# Get load averages and process counts from kstat
+stats=$(kstat -p 'unix:0:system_misc:avenrun_1min' \
+                 'unix:0:system_misc:avenrun_5min' \
+                 'unix:0:system_misc:avenrun_15min' \
+                 'unix:0:system_misc:nproc' 2>/dev/null || true)
+
+# shellcheck disable=SC2181
+if [ -z "$stats" ]; then
+    # If kstat fails, exit silently
+    exit 0
+fi
+
+# Extract load averages (scaled by 256, need to divide)
+avenrun_1min=$(echo "$stats" | grep 'avenrun_1min' | awk '{print $2}')
+avenrun_5min=$(echo "$stats" | grep 'avenrun_5min' | awk '{print $2}')
+avenrun_15min=$(echo "$stats" | grep 'avenrun_15min' | awk '{print $2}')
+nproc=$(echo "$stats" | grep 'nproc' | awk '{print $2}')
+
+# Convert load averages (divide by 256)
+if [ -n "$avenrun_1min" ]; then
+    load_1min=$(awk "BEGIN {printf \"%.2f\", $avenrun_1min / 256}")
+fi
+
+if [ -n "$avenrun_5min" ]; then
+    load_5min=$(awk "BEGIN {printf \"%.2f\", $avenrun_5min / 256}")
+fi
+
+if [ -n "$avenrun_15min" ]; then
+    load_15min=$(awk "BEGIN {printf \"%.2f\", $avenrun_15min / 256}")
+fi
+
+# Output load average metrics
+printf '# HELP cn_load_average_1min System load average over 1 minute\n'
+printf '# TYPE cn_load_average_1min gauge\n'
+printf 'cn_load_average_1min\t%s\n' "$load_1min"
+
+printf '# HELP cn_load_average_5min System load average over 5 minutes\n'
+printf '# TYPE cn_load_average_5min gauge\n'
+printf 'cn_load_average_5min\t%s\n' "$load_5min"
+
+printf '# HELP cn_load_average_15min System load average over 15 minutes\n'
+printf '# TYPE cn_load_average_15min gauge\n'
+printf 'cn_load_average_15min\t%s\n' "$load_15min"
+
+# Output process count
+if [ -n "$nproc" ]; then
+    printf '# HELP cn_processes Total number of processes\n'
+    printf '# TYPE cn_processes gauge\n'
+    printf 'cn_processes\t%s\n' "$nproc"
+fi
+
+# Get context switches and interrupts (sum across all CPUs)
+cpu_stats=$(kstat -p 'cpu:::pswitch' 'cpu:::intr' 2>/dev/null || true)
+
+if [ -n "$cpu_stats" ]; then
+    # Sum context switches
+    total_pswitch=$(echo "$cpu_stats" | grep 'pswitch' | awk '{sum += $2} END {print sum}')
+
+    # Sum interrupts
+    total_intr=$(echo "$cpu_stats" | grep 'intr' | awk '{sum += $2} END {print sum}')
+
+    if [ -n "$total_pswitch" ]; then
+        printf '# HELP cn_cpu_context_switches_total Total number of context switches across all CPUs\n'
+        printf '# TYPE cn_cpu_context_switches_total counter\n'
+        printf 'cn_cpu_context_switches_total\t%s\n' "$total_pswitch"
+    fi
+
+    if [ -n "$total_intr" ]; then
+        printf '# HELP cn_cpu_interrupts_total Total number of interrupts across all CPUs\n'
+        printf '# TYPE cn_cpu_interrupts_total counter\n'
+        printf 'cn_cpu_interrupts_total\t%s\n' "$total_intr"
+    fi
+fi
