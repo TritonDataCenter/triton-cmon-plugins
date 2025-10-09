@@ -1,0 +1,137 @@
+#!/bin/bash
+
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
+# Copyright 2025 Edgecast Cloud LLC.
+
+set -o errexit
+set -o pipefail
+
+# shellcheck disable=SC2154
+if [[ -n "$TRACE" ]]; then
+    export PS4='[\D{%FT%TZ}] ${BASH_SOURCE}:${LINENO}: ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
+    set -o xtrace
+fi
+
+# Get list of zones with all needed fields in parseable format
+zone_list=$(vmadm list -p -o uuid,alias,brand,state,ram,vcpus,quota,flexible_disk_size,max_swap,max_lwps,billing_id,owner_uuid 2>/dev/null || true)
+
+# shellcheck disable=SC2181
+if [ -z "$zone_list" ]; then
+    # If vmadm fails or no zones, exit silently
+    exit 0
+fi
+
+# Set TTL to 300 seconds (5 minutes) since vmadm operations are expensive
+printf '# OPTION ttl 300\n'
+
+# Initialize counters for zone counts by brand and state
+declare -A zone_counts
+total_ram=0
+total_vcpus=0
+total_quota=0
+total_flexible_disk=0
+total_swap=0
+total_max_lwps=0
+
+# Track zone info for info metrics
+zone_info_lines=""
+
+# Process each zone (vmadm list -p outputs colon-separated fields)
+while IFS=: read -r uuid alias brand state ram vcpus quota flexible_disk max_swap max_lwps billing_id owner_uuid; do
+    # Handle empty/null values
+    [ -z "$alias" ] && alias=""
+    [ -z "$billing_id" ] && billing_id=""
+    [ -z "$owner_uuid" ] && owner_uuid=""
+    [ -z "$ram" ] && ram="0"
+    [ -z "$vcpus" ] && vcpus="0"
+    [ -z "$quota" ] && quota="0"
+    [ -z "$flexible_disk" ] && flexible_disk="0"
+    [ -z "$max_swap" ] && max_swap="0"
+    [ -z "$max_lwps" ] && max_lwps="0"
+
+    # Count zones by brand and state
+    key="${brand},${state}"
+    if [ -z "${zone_counts[$key]}" ]; then
+        zone_counts[$key]=0
+    fi
+    zone_counts[$key]=$((zone_counts[$key] + 1))
+
+    # Sum up resource allocations (for all zones, not just running)
+    # RAM is in MiB, convert to bytes
+    if [ "$ram" != "0" ]; then
+        ram_bytes=$((ram * 1048576))
+        total_ram=$((total_ram + ram_bytes))
+    fi
+
+    # VCPUs
+    if [ "$vcpus" != "0" ]; then
+        total_vcpus=$((total_vcpus + vcpus))
+    fi
+
+    # Quota is in GiB, convert to bytes
+    if [ "$quota" != "0" ]; then
+        quota_bytes=$((quota * 1073741824))
+        total_quota=$((total_quota + quota_bytes))
+    fi
+
+    # Flexible disk size is in MiB, convert to bytes
+    if [ "$flexible_disk" != "0" ]; then
+        flexible_disk_bytes=$((flexible_disk * 1048576))
+        total_flexible_disk=$((total_flexible_disk + flexible_disk_bytes))
+    fi
+
+    # Max swap is in MiB, convert to bytes
+    if [ "$max_swap" != "0" ]; then
+        max_swap_bytes=$((max_swap * 1048576))
+        total_swap=$((total_swap + max_swap_bytes))
+    fi
+
+    # Max lwps
+    if [ "$max_lwps" != "0" ]; then
+        total_max_lwps=$((total_max_lwps + max_lwps))
+    fi
+
+    # Build zone info line
+    zone_info_lines="${zone_info_lines}cn_zone_info{uuid=\"${uuid}\",alias=\"${alias}\",brand=\"${brand}\",state=\"${state}\",billing_id=\"${billing_id}\",owner_uuid=\"${owner_uuid}\"}\t1\n"
+done <<< "$zone_list"
+
+# Output zone count metrics by brand and state
+printf '# HELP cn_zones Number of zones by brand and state\n'
+printf '# TYPE cn_zones gauge\n'
+for key in "${!zone_counts[@]}"; do
+    IFS=',' read -r brand state <<< "$key"
+    printf 'cn_zones{brand="%s",state="%s"}\t%d\n' "$brand" "$state" "${zone_counts[$key]}"
+done
+
+# Output resource allocation totals
+printf '# HELP cn_zone_allocated_memory_bytes Total memory allocated to all zones in bytes\n'
+printf '# TYPE cn_zone_allocated_memory_bytes gauge\n'
+printf 'cn_zone_allocated_memory_bytes\t%d\n' "$total_ram"
+
+printf '# HELP cn_zone_allocated_vcpus Total vCPUs allocated to all zones\n'
+printf '# TYPE cn_zone_allocated_vcpus gauge\n'
+printf 'cn_zone_allocated_vcpus\t%d\n' "$total_vcpus"
+
+printf '# HELP cn_zone_allocated_disk_bytes Total disk quota allocated to all zones in bytes\n'
+printf '# TYPE cn_zone_allocated_disk_bytes gauge\n'
+printf 'cn_zone_allocated_disk_bytes\t%d\n' "$total_quota"
+
+printf '# HELP cn_zone_allocated_flexible_disk_bytes Total flexible disk size allocated to all zones in bytes\n'
+printf '# TYPE cn_zone_allocated_flexible_disk_bytes gauge\n'
+printf 'cn_zone_allocated_flexible_disk_bytes\t%d\n' "$total_flexible_disk"
+
+printf '# HELP cn_zone_allocated_swap_bytes Total swap allocated to all zones in bytes\n'
+printf '# TYPE cn_zone_allocated_swap_bytes gauge\n'
+printf 'cn_zone_allocated_swap_bytes\t%d\n' "$total_swap"
+
+printf '# HELP cn_zone_allocated_max_lwps Total max lightweight processes allocated to all zones\n'
+printf '# TYPE cn_zone_allocated_max_lwps gauge\n'
+printf 'cn_zone_allocated_max_lwps\t%d\n' "$total_max_lwps"
+
+# Output zone info metrics
+printf '# HELP cn_zone_info Zone information with labels\n'
+printf '# TYPE cn_zone_info gauge\n'
+printf '%b' "$zone_info_lines"
