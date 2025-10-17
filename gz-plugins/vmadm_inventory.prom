@@ -28,7 +28,7 @@ fi
 printf '# OPTION ttl 300\n'
 
 # Initialize counters for zone counts by brand and state
-declare -a zone_counts
+declare -A zone_counts
 total_ram=0
 total_vcpus=0
 total_quota=0
