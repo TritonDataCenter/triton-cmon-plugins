@@ -73,7 +73,7 @@ link:0:cxgbe0:link_state	0
 EOF
             ;;
         # Disk I/O stats for blkdev
-        blkdev:*:*:nread\ blkdev:*:*:nwritten\ blkdev:*:*:reads\ blkdev:*:*:writes\ blkdev:*:*:rtime\ blkdev:*:*:wtime)
+        blkdev:::nread\ blkdev:::nwritten\ blkdev:::reads\ blkdev:::writes\ blkdev:::rtime\ blkdev:::wtime)
             cat <<EOF
 blkdev:0:blkdev0:nread	389529783296
 blkdev:1:blkdev1:nread	437561932800

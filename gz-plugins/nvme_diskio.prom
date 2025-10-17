@@ -34,12 +34,12 @@ for disk in $disk_list; do
     # The kstat name format is blkdev:instance:name:stat
 
     # Get all blkdev stats and filter for this disk
-    stats=$(kstat -p "blkdev:*:*:nread" \
-                     "blkdev:*:*:nwritten" \
-                     "blkdev:*:*:reads" \
-                     "blkdev:*:*:writes" \
-                     "blkdev:*:*:rtime" \
-                     "blkdev:*:*:wtime" 2>/dev/null || true)
+    stats=$(kstat -p "blkdev:::nread" \
+                     "blkdev:::nwritten" \
+                     "blkdev:::reads" \
+                     "blkdev:::writes" \
+                     "blkdev:::rtime" \
+                     "blkdev:::wtime" 2>/dev/null || true)
 
     if [ -z "$stats" ]; then
         continue
