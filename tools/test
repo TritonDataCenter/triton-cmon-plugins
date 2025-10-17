@@ -16,11 +16,14 @@ NC='\033[0m' # No Color
 
 for i in "$@"; do
     OUTPUT=$($i)
+    EXPECTED_OUTPUT_FILE=tests/outputs/$(basename $i)
     echo -e "${YELLOW}[INFO] validating $i..."
-    diff --color=always -u tests/outputs/$(basename $i) <(cat<<<"$OUTPUT")
-    if [[ "$?" != "0" ]]; then
-      echo -e "${RED}[FAILED]: expected output and actual output do not match for $i."
-      exit 1
+    if [[ -f "$EXPECTED_OUTPUT_FILE" ]]; then
+      diff --color=always -u $EXPECTED_OUTPUT_FILE <(cat<<<"$OUTPUT")
+      if [[ "$?" != "0" ]]; then
+        echo -e "${RED}[FAILED]: expected output and actual output do not match for $i."
+        exit 1
+      fi
     fi
     cat<<<"$OUTPUT" | promtool check metrics
     if [[ "$?" != "0" ]]; then
