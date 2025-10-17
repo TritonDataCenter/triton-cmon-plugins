@@ -29,28 +29,28 @@ else
     exit 1
 fi
 
-echo -e "${YELLOW}[INFO] testing $PLUGIN with zone UUID: $ZONE_UUID..."
+echo -e "${YELLOW}[INFO] testing $PLUGIN with zone UUID: $ZONE_UUID...${NC}"
 
 
-echo -e "${YELLOW}[INFO] testing output length for $PLUGIN..."
+echo -e "${YELLOW}[INFO] testing output length for $PLUGIN...${NC}"
 if [[ -z "$OUTPUT" ]]; then
-  echo -e "${RED}[FAILED]: plugin returned no output $PLUGIN."
+  echo -e "${RED}[FAILED]: plugin returned no output $PLUGIN.${NC}"
   exit 1
 fi
 
-echo -e "${YELLOW}[INFO] testing expected and actual output for $PLUGIN..."
+echo -e "${YELLOW}[INFO] testing expected and actual output for $PLUGIN...${NC}"
 if [[ -f "$EXPECTED_OUTPUT_FILE" ]]; then
   diff --color=always -u $EXPECTED_OUTPUT_FILE <(cat<<<"$OUTPUT")
   if [[ "$?" != "0" ]]; then
-    echo -e "${RED}[FAILED]: expected output and actual output do not match for $PLUGIN."
+    echo -e "${RED}[FAILED]: expected output and actual output do not match for $PLUGIN.${NC}"
     exit 1
   fi
 else
-  echo -e "${YELLOW}[WARNING] no expected output file found for $PLUGIN..."
+  echo -e "${YELLOW}[WARNING] no expected output file found for $PLUGIN...${NC}"
 fi
 cat<<<"$OUTPUT" | promtool check metrics
 if [[ "$?" != "0" ]]; then
-  echo -e "${RED}[FAILED]: plugin output is not valid prometheus format $PLUGIN."
+  echo -e "${RED}[FAILED]: plugin output is not valid prometheus format $PLUGIN.${NC}"
   exit 1
 fi
-echo -e "${GREEN}[PASSED]: $PLUGIN"
+echo -e "${GREEN}[PASSED]: $PLUGIN${NC}"
