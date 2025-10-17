@@ -1,0 +1,9 @@
+# HELP zfs_used ZFS space used by zones dataset in bytes
+# TYPE zfs_used gauge
+zfs_used	0
+# HELP zfs_quota ZFS quota for zones dataset in bytes
+# TYPE zfs_quota gauge
+zfs_quota	0
+# HELP zfs_available ZFS space available to zones dataset in bytes
+# TYPE zfs_available gauge
+zfs_available	0

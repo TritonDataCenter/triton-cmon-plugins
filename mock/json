@@ -1,0 +1,7 @@
+#!/bin/bash
+
+# Output for json command needs to be hardcoded because if it were based on actual time
+# it would never pass.
+cat <<EOF
+19010734
+EOF

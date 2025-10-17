@@ -3,8 +3,10 @@
 if [[ "$1" == -j ]]; then
     shift
     case "$@" in
-        unix:*:boot_time)
-            printf '[{"module":"unix","instance":0,"name":"system_misc","class":"misc","type":1,"snaptime":4308486.54831974,"data":{"boot_time":1595104221}}]'
+        unix:::boot_time)
+          cat <<EOF
+[{ "module": "unix", "instance": 0, "name": "system_misc", "class": "misc", "type": 1, "snaptime": 19012070.274223123, "data": { "boot_time": 1741717927 } }]
+EOF
             ;;
         *)
             printf '{}'
@@ -15,7 +17,7 @@ elif [[ "$1" == -p ]]; then
     # Handle -p (parseable) output for various kstat queries
     case "$@" in
         # Memory stats
-        unix:0:system_pages:physmem|unix:0:system_pages:freemem|unix:0:system_pages:availrmem)
+        unix:0:system_pages:physmem\ unix:0:system_pages:freemem\ unix:0:system_pages:availrmem)
             cat <<EOF
 unix:0:system_pages:physmem	100313289
 unix:0:system_pages:freemem	41088663
@@ -43,13 +45,13 @@ EOF
         # Network stats for igb0
         link::igb0:*)
             cat <<EOF
-link:0:igb0:rbytes64	10124765017255
-link:0:igb0:obytes64	6987234605
-link:0:igb0:ipackets64	29472455016
-link:0:igb0:opackets64	20633924
-link:0:igb0:ierrors	7
+link:0:igb0:rbytes64	9945603321958
+link:0:igb0:obytes64	6172629005
+link:0:igb0:ipackets64	28940220713
+link:0:igb0:opackets64	16294949
+link:0:igb0:ierrors	5
 link:0:igb0:oerrors	0
-link:0:igb0:norcvbuf	21
+link:0:igb0:norcvbuf	32
 link:0:igb0:noxmtbuf	0
 link:0:igb0:ifspeed	1000000000
 link:0:igb0:link_state	1
@@ -59,9 +61,9 @@ EOF
         link::cxgbe0:*)
             cat <<EOF
 link:0:cxgbe0:rbytes64	0
-link:0:cxgbe0:obytes64	80876315
+link:0:cxgbe0:obytes64	54970235
 link:0:cxgbe0:ipackets64	0
-link:0:cxgbe0:opackets64	869638
+link:0:cxgbe0:opackets64	591078
 link:0:cxgbe0:ierrors	0
 link:0:cxgbe0:oerrors	0
 link:0:cxgbe0:norcvbuf	0
@@ -387,10 +389,10 @@ EOF
         # Load average and process stats
         unix:0:system_misc:avenrun_1min\ unix:0:system_misc:avenrun_5min\ unix:0:system_misc:avenrun_15min\ unix:0:system_misc:nproc)
             cat <<EOF
-unix:0:system_misc:avenrun_1min	119
-unix:0:system_misc:avenrun_5min	132
-unix:0:system_misc:avenrun_15min	129
-unix:0:system_misc:nproc	99
+unix:0:system_misc:avenrun_1min	2042
+unix:0:system_misc:avenrun_5min	1970
+unix:0:system_misc:avenrun_15min	1958
+unix:0:system_misc:nproc	167
 EOF
             ;;
         # Context switches and interrupts
