@@ -16,13 +16,13 @@ if [[ -n "$TRACE" ]]; then
 fi
 
 # Get per-CPU time statistics and CPU info
-cpu_stats=$(kstat -p 'cpu:*:sys:cpu_nsec_user' \
-                      'cpu:*:sys:cpu_nsec_kernel' \
-                      'cpu:*:sys:cpu_nsec_idle' \
-                      'cpu:*:sys:cpu_nsec_intr' \
-                      'cpu_info:*:*:brand' \
-                      'cpu_info:*:*:chip_id' \
-                      'cpu_info:*:*:clock_MHz' 2>/dev/null || true)
+cpu_stats=$(kstat -p  'cpu::sys:cpu_nsec_user' \
+                      'cpu::sys:cpu_nsec_kernel' \
+                      'cpu::sys:cpu_nsec_idle' \
+                      'cpu::sys:cpu_nsec_intr' \
+                      'cpu_info:::brand' \
+                      'cpu_info:::chip_id' \
+                      'cpu_info:::clock_MHz' 2>/dev/null || true)
 
 # shellcheck disable=SC2181
 if [ -z "$cpu_stats" ]; then
