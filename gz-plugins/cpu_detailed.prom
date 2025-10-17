@@ -22,7 +22,7 @@ cpu_stats=$(kstat -p  'cpu::sys:cpu_nsec_user' \
                       'cpu::sys:cpu_nsec_intr' \
                       'cpu_info:::brand' \
                       'cpu_info:::chip_id' \
-                      'cpu_info:::clock_MHz' 2>/dev/null || true)
+                      'cpu_info:::clock_MHz' 2>/dev/null)
 
 # shellcheck disable=SC2181
 if [ -z "$cpu_stats" ]; then
