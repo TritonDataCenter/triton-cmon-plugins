@@ -31,7 +31,7 @@ if [ -z "$cpu_stats" ]; then
 fi
 
 # Get list of CPU IDs
-cpu_ids=$(echo "$cpu_stats" | grep 'cpu_nsec_user' | cut -d: -f2 | sort -n | uniq)
+cpu_ids=$(psrinfo | cut -f1)
 
 # Output per-core CPU time metrics
 printf '# HELP cn_cpu_core_user_seconds_total CPU time spent in user mode per core\n'
