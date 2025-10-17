@@ -40,7 +40,7 @@ release-gh-cli: clean .version $(ARCHIVE)
 check:
 	@[[ -d gz-plugins ]] || mkdir gz-plugins
 	@[[ -d vm-plugins ]] || mkdir vm-plugins
-	@sh -c "find gz-plugins vm-plugins -type f -name '*.prom' -exec tools/promlint {} +"
+	@sh -c "find gz-plugins vm-plugins -type f -name '*.prom' -exec tools/test {} +"
 
 clean:
 	rm -f $(ARCHIVE)
