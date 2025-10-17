@@ -1,0 +1,24 @@
+#!/bin/bash
+
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
+# Copyright 2025 Edgecast Cloud LLC.
+
+set -o pipefail
+
+for i in "$@"; do
+    OUTPUT=$($i)
+    echo "[INFO] valiating $i..."
+    diff -u <(cat<<<"$OUTPUT") tests/outputs/$(basename $i) 
+    if [[ "$?" != "0" ]]; then
+      echo "[FAILED]: expected output and actual output do not match for $i."
+      exit 1
+    fi
+    $OUTPUT | promtool check metrics
+    if [[ "$?" != "0" ]]; then
+      echo "[FAILED]: plugin output is not valid prometheus format $i."
+      exit 1
+    fi
+done
