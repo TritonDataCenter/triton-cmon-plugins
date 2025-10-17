@@ -48,6 +48,134 @@ INNEREOF
   "owner_uuid": "7a53ef65-3ed6-400b-a66a-e200df261ec9"
 }
 INNEREOF
+        elif [[ "$uuid" == "a83d6dcb-ee7f-41bd-9ee9-0b9577f9b999" ]]; then
+            cat <<'INNEREOF'
+{
+  "zonename": "a83d6dcb-ee7f-41bd-9ee9-0b9577f9b999",
+  "autoboot": true,
+  "brand": "joyent",
+  "limit_priv": "default",
+  "v": 1,
+  "create_timestamp": "2025-07-02T15:40:28.024Z",
+  "image_uuid": "9d7b2651-4525-42d7-8147-4d6f8f2dd7dd",
+  "cpu_shares": 32,
+  "max_lwps": 8192,
+  "max_msg_ids": 4096,
+  "max_sem_ids": 4096,
+  "max_shm_ids": 4096,
+  "max_shm_memory": 4096,
+  "zfs_io_priority": 100,
+  "max_physical_memory": 4096,
+  "max_locked_memory": 4096,
+  "max_swap": 8192,
+  "cpu_cap": 400,
+  "billing_id": "5e74772d-8663-491f-90dd-1bf7b1939f45",
+  "owner_uuid": "1bfca979-16d4-49d7-90db-cb70fc1da870",
+  "tmpfs": 4096,
+  "hostname": "em7h1fewref3w-lb-f7xm3yg3shde-nvka",
+  "dns_domain": "inst.pulse.us-central-1a.cns.parlercloud.zone",
+  "archive_on_delete": true,
+  "resolvers": [
+    "10.11.36.2",
+    "10.11.36.3",
+    "142.147.4.53",
+    "1.1.1.1",
+    "4.2.2.4",
+    "8.8.8.8"
+  ],
+  "alias": "em7h1fewref3w-lb-f7xm3yg3shde-nvka",
+  "nics": [
+    {
+      "interface": "net0",
+      "mac": "90:b8:d0:19:ea:1b",
+      "vlan_id": 121,
+      "nic_tag": "internal",
+      "gateway": "10.11.36.1",
+      "gateways": [
+        "10.11.36.1"
+      ],
+      "netmask": "255.255.252.0",
+      "ip": "10.11.36.48",
+      "ips": [
+        "10.11.36.48/22"
+      ],
+      "network_uuid": "dd1f527d-e09e-489b-bcb4-d5b85bf03fcf",
+      "mtu": 1500
+    },
+    {
+      "interface": "net1",
+      "mac": "90:b8:d0:a6:36:95",
+      "vlan_id": 1474,
+      "nic_tag": "external",
+      "gateway": "142.147.4.1",
+      "gateways": [
+        "142.147.4.1"
+      ],
+      "netmask": "255.255.255.0",
+      "ip": "142.147.4.129",
+      "ips": [
+        "142.147.4.129/24"
+      ],
+      "network_uuid": "13ab1828-2ba1-47cd-bfa7-59cdf2a2cb29",
+      "mtu": 1500,
+      "primary": true
+    },
+    {
+      "interface": "net2",
+      "mac": "90:b8:d0:8e:29:98",
+      "vlan_id": 116,
+      "nic_tag": "internal",
+      "gateway": "10.11.16.1",
+      "gateways": [
+        "10.11.16.1"
+      ],
+      "netmask": "255.255.252.0",
+      "ip": "10.11.17.152",
+      "ips": [
+        "10.11.17.152/22"
+      ],
+      "network_uuid": "298b1f90-bb10-4f99-8e29-91f5ee5aa69c",
+      "mtu": 1500
+    }
+  ],
+  "uuid": "a83d6dcb-ee7f-41bd-9ee9-0b9577f9b999",
+  "zone_state": "running",
+  "zonepath": "/zones/a83d6dcb-ee7f-41bd-9ee9-0b9577f9b999",
+  "hvm": false,
+  "zoneid": 36,
+  "zonedid": 45,
+  "last_modified": "2025-09-25T08:29:40.000Z",
+  "firewall_enabled": false,
+  "server_uuid": "804705ac-b7f8-4f8a-9389-4c38d51e0f27",
+  "datacenter_name": "us-central-1a",
+  "platform_buildstamp": "20241212T000748Z",
+  "state": "running",
+  "boot_timestamp": "2025-07-02T15:41:07.000Z",
+  "init_restarts": 0,
+  "pid": 577903,
+  "customer_metadata": {
+    "cloud.tritoncompute:loadbalancer": "true",
+    "cloud.tritoncompute:portmap": "tcp://15080:1a-pulse-internal.3shvv1ebbccb.svc.1bfca979-16d4-49d7-90db-cb70fc1da870.us-central-1a.cns.parlercloud.zone:31616{rise:30,fall:1},tcp://15443:1a-pulse-internal.3shvv1ebbccb.svc.1bfca979-16d4-49d7-90db-cb70fc1da870.us-central-1a.cns.parlercloud.zone:32584{rise:30,fall:1},tcp://443:1a-pulse-internal.3shvv1ebbccb.svc.1bfca979-16d4-49d7-90db-cb70fc1da870.us-central-1a.cns.parlercloud.zone:31831{rise:30,fall:1},tcp://80:1a-pulse-internal.3shvv1ebbccb.svc.1bfca979-16d4-49d7-90db-cb70fc1da870.us-central-1a.cns.parlercloud.zone:31958{rise:30,fall:1}",
+    "root_authorized_keys": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFdlSlHr7T0O5frED1sIVGL+gFRJCifE2E4DO7acqyzg\nssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDIwaPkUioCUa1jRU0Ex6KeNmwsu4WRrWJRaKB+k/+a4tqrzziSgpjfoJ1vjfV6pB3V2ZCiPC30zWMNYRiKjAMv2nETJC80CvnhTR35QSlN1VMYjLG2DQTeMw39q8UncM8DVQ1aM0wByizNFD5U/rTCm13sxrwRr5N8326KRvuvwWTOS9O1vr/MvGUvU5YxWFl3bzpvKg8eMRAyNW1rkd6pcYUzS+/L+9+YyKpfmlEycix978TZQB/FZSJdzhRW83NJCAK1MU4o5TvAGZKWBlWWunsfzUl10Dak4zsVslvSBdX4ENDrDTMrHfohtzaxL+Eshr/1UQh91s7zZfje08K3qBDSm3Irbbi2feGfVrX3ihwKYPjIZcPBpDQv2vmDmQRN4aqc5yLXoe+iVTtdauYWgebzPFS2She46h+/8xxGLauQqdosuvpWfOBIISUmsO5I9wKsul1AOCS6TWbNKfTmlKwq/sHje6Fw/ZJ1SUAH3QwwjyWb/j2c530mXlQBtvVUyw14niZIHZdf+qFGeKIHdAmceLuk1PuNvQxj220owi18eOa8TysrhVGOgOgT5lgMxHC7saTah8WLLAlLHUqkRjpqG6W/alP9e/VNrpx+vdUBQUxVu5pM1TKXBUKYiEhwmnT0hZB9YExmTeOiZLnxlbG9JdbMpPLWtQIQ0LocMw==\n",
+    "cloud.tritoncompute:syslog": ""
+  },
+  "internal_metadata": {},
+  "routes": {},
+  "tags": {
+    "triton.cns.services": "lb-f7xm3yg3shde",
+    "cpln-lb-target": "istio-ingressgateway-us-central-1a/istio-system/cd2ec13d-ca53-4388-bad8-85d067b2b4b8",
+    "cpln-owner": "em7h1fewref3w/lb",
+    "cpln-cluster-name": "da11-k8s-dev-1",
+    "cpln-cluster-org": "pulse-dev"
+  },
+  "quota": 50,
+  "zfs_root_compression": "lz4",
+  "zfs_root_recsize": 131072,
+  "zfs_filesystem": "zones/a83d6dcb-ee7f-41bd-9ee9-0b9577f9b999",
+  "zpool": "zones",
+  "snapshots": []
+}
+INNEREOF
         fi
         ;;
 esac

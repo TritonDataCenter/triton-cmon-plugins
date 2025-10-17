@@ -1,0 +1,5 @@
+# HELP plugin_smf_service_state Zone count by state
+# TYPE plugin_smf_service_state gauge
+plugin_smf_service_state{state="disabled"}	3
+plugin_smf_service_state{state="legacy_run"}	2
+plugin_smf_service_state{state="online"}	70

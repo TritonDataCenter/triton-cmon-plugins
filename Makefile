@@ -40,7 +40,10 @@ release-gh-cli: clean .version $(ARCHIVE)
 check:
 	@[[ -d gz-plugins ]] || mkdir gz-plugins
 	@[[ -d vm-plugins ]] || mkdir vm-plugins
-	@sh -c "find gz-plugins vm-plugins -type f -name '*.prom' -exec tools/test {} +"
+	# Run tests for gz plugins
+	@find gz-plugins -name '*.prom' -print0 | xargs -0 -I{} tools/test {} global
+	# Run tests for vm plugins
+	@find vm-plugins -name '*.prom' -print0 | xargs -0 -I{} tools/test {} a83d6dcb-ee7f-41bd-9ee9-0b9577f9b999
 
 clean:
 	rm -f $(ARCHIVE)

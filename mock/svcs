@@ -1,7 +1,219 @@
 #!/bin/bash
 
-# svcs -o state
-cat << EOF
+# Parse arguments to handle -z flag
+zone=""
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        -z)
+            zone="$2"
+            shift 2
+            ;;
+        *)
+            shift
+            ;;
+    esac
+done
+
+# Return different outputs based on zone
+if [[ "$zone" == "global" ]]; then
+    # Global zone SMF services
+    cat << EOF
+disabled
+legacy_run
+legacy_run
+legacy_run
+legacy_run
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+EOF
+elif [[ "$zone" == "a83d6dcb-ee7f-41bd-9ee9-0b9577f9b999" ]]; then
+    # Zone-specific SMF services
+    cat << EOF
+disabled
+disabled
+disabled
+legacy_run
+legacy_run
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+online
+EOF
+else
+    # Default output
+    cat << EOF
 disabled
 degraded
 legacy_run
@@ -11,3 +223,4 @@ offline*
 offline
 maintenance
 EOF
+fi
