@@ -1,7 +1,8 @@
 # OPTION ttl 300
 # HELP cn_zones Number of zones by brand and state
 # TYPE cn_zones gauge
-cn_zones{brand="0",state=""}	9
+cn_zones{brand="joyent",state="running"}	3
+cn_zones{brand="bhyve",state="running"}	6
 # HELP cn_zone_allocated_memory_bytes Total memory allocated to all zones in bytes
 # TYPE cn_zone_allocated_memory_bytes gauge
 cn_zone_allocated_memory_bytes	210184962048
