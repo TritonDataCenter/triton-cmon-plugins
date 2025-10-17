@@ -8,17 +8,24 @@
 
 set -o pipefail
 
+# Colors - use always to force output through make
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+NC='\033[0m' # No Color
+
 for i in "$@"; do
     OUTPUT=$($i)
-    echo "[INFO] valiating $i..."
-    diff -u <(cat<<<"$OUTPUT") tests/outputs/$(basename $i) 
+    echo -e "${YELLOW}[INFO] validating $i..."
+    diff --color=always -u tests/outputs/$(basename $i) <(cat<<<"$OUTPUT")
     if [[ "$?" != "0" ]]; then
-      echo "[FAILED]: expected output and actual output do not match for $i."
+      echo -e "${RED}[FAILED]: expected output and actual output do not match for $i."
       exit 1
     fi
-    $OUTPUT | promtool check metrics
+    cat<<<"$OUTPUT" | promtool check metrics
     if [[ "$?" != "0" ]]; then
-      echo "[FAILED]: plugin output is not valid prometheus format $i."
+      echo -e "${RED}[FAILED]: plugin output is not valid prometheus format $i."
       exit 1
     fi
+    echo -e "${GREEN}[PASSED]: $i"
 done
