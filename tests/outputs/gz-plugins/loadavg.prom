@@ -1,3 +1,4 @@
+# OPTION ttl 0
 # HELP cn_load_average_1min System load average over 1 minute
 # TYPE cn_load_average_1min gauge
 cn_load_average_1min	7.98

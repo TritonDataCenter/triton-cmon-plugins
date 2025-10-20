@@ -46,6 +46,8 @@ if [ -n "$avenrun_15min" ]; then
     load_15min=$(awk "BEGIN {printf \"%.2f\", $avenrun_15min / 256}")
 fi
 
+# Set TTL to 0 seconds to ensure accurate rate calculations
+printf '# OPTION ttl 0\n'
 # Output load average metrics
 printf '# HELP cn_load_average_1min System load average over 1 minute\n'
 printf '# TYPE cn_load_average_1min gauge\n'

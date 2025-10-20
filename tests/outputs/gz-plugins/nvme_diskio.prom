@@ -1,3 +1,4 @@
+# OPTION ttl 0
 # HELP cn_disk_reads_total Total disk read operations
 # TYPE cn_disk_reads_total counter
 cn_disk_reads_total{disk="c4t1d0"}	277341335

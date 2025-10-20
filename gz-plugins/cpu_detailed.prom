@@ -33,6 +33,8 @@ fi
 # Get list of CPU IDs
 cpu_ids=$(psrinfo | cut -f1)
 
+# Set TTL to 0 seconds to ensure accurate rate calculations
+printf '# OPTION ttl 0\n'
 # Output per-core CPU time metrics
 printf '# HELP cn_cpu_core_user_seconds_total CPU time spent in user mode per core\n'
 printf '# TYPE cn_cpu_core_user_seconds_total counter\n'

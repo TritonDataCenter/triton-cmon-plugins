@@ -27,6 +27,8 @@ fi
 
 first_disk=true
 
+# Set TTL to 0 seconds to ensure accurate rate calculations
+printf '# OPTION ttl 0\n'
 # Process each disk
 for disk in $disk_list; do
     # Try to get statistics from kstat using blkdev module

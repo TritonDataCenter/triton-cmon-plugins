@@ -1,3 +1,4 @@
+# OPTION ttl 0
 # HELP cn_network_receive_bytes_total Network bytes received on interface
 # TYPE cn_network_receive_bytes_total counter
 cn_network_receive_bytes_total{interface="igb0"}	9945603321958

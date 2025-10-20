@@ -1,3 +1,4 @@
+# OPTION ttl 0
 # HELP cn_cpu_core_user_seconds_total CPU time spent in user mode per core
 # TYPE cn_cpu_core_user_seconds_total counter
 cn_cpu_core_user_seconds_total{core="0"}	11547.759579557

@@ -24,6 +24,8 @@ if [ -z "$phys_interfaces" ]; then
     exit 0
 fi
 
+# Set TTL to 0 seconds to ensure accurate rate calculations
+printf '# OPTION ttl 0\n'
 # Process each physical interface
 for interface in $phys_interfaces; do
     # Get network statistics from kstat

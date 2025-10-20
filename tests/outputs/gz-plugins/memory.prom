@@ -1,3 +1,4 @@
+# OPTION ttl 0
 # HELP cn_memory_total_bytes Total physical memory in bytes
 # TYPE cn_memory_total_bytes gauge
 cn_memory_total_bytes	410883231744
