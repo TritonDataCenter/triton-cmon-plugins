@@ -15,13 +15,13 @@ if [[ -n "$TRACE" ]]; then
     set -o xtrace
 fi
 
-# Get list of disk devices from iostat (exclude header)
-# Filter out lofi, ramdisk, and zpool devices - only physical disks
-disk_list=$(iostat -xnp 1 1 2>/dev/null | tail -n +3 | grep -v "^$" | awk '{print $NF}' | grep -v -E '^(lofi|ramdisk|zones|rpool)' || true)
+# Get list of disk devices from diskinfo
+# This returns only NVMe disks with format: TYPE DISK VENDOR MODEL SIZE REMOVABLE SOLID_STATE
+disk_list=$(diskinfo -Hp 2>/dev/null | grep "^NVME" | awk '{print $2}' || true)
 
 # shellcheck disable=SC2181
 if [ -z "$disk_list" ]; then
-    # If iostat fails, exit silently
+    # If diskinfo fails or returns no disks, exit silently
     exit 0
 fi
 
