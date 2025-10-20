@@ -33,46 +33,54 @@ fi
 # Get list of CPU IDs
 cpu_ids=$(psrinfo | cut -f1)
 
+# Parse cpu_stats once into associative arrays
+declare -A user_sec
+declare -A kernel_sec
+declare -A idle_sec
+declare -A intr_sec
+
+while IFS=$'\t' read -r key value; do
+    if [[ $key =~ ^cpu:([0-9]+):sys:cpu_nsec_user$ ]]; then
+        value_sec=$(awk "BEGIN {printf \"%.9f\", $value / 1000000000}")
+        user_sec[${BASH_REMATCH[1]}]=$value_sec
+    elif [[ $key =~ ^cpu:([0-9]+):sys:cpu_nsec_kernel$ ]]; then
+        value_sec=$(awk "BEGIN {printf \"%.9f\", $value / 1000000000}")
+        kernel_sec[${BASH_REMATCH[1]}]=$value_sec
+    elif [[ $key =~ ^cpu:([0-9]+):sys:cpu_nsec_idle$ ]]; then
+        value_sec=$(awk "BEGIN {printf \"%.9f\", $value / 1000000000}")
+        idle_sec[${BASH_REMATCH[1]}]=$value_sec
+    elif [[ $key =~ ^cpu:([0-9]+):sys:cpu_nsec_intr$ ]]; then
+        value_sec=$(awk "BEGIN {printf \"%.9f\", $value / 1000000000}")
+        intr_sec[${BASH_REMATCH[1]}]=$value_sec
+    fi
+done <<< "$cpu_stats"
+
 # Set TTL to 0 seconds to ensure accurate rate calculations
 printf '# OPTION ttl 0\n'
-# Output per-core CPU time metrics
+
+# Output metric headers
 printf '# HELP cn_cpu_core_user_seconds_total CPU time spent in user mode per core\n'
 printf '# TYPE cn_cpu_core_user_seconds_total counter\n'
-for cpu_id in $cpu_ids; do
-    nsec=$(echo "$cpu_stats" | grep "^cpu:${cpu_id}:sys:cpu_nsec_user" | awk '{print $2}')
-    if [ -n "$nsec" ]; then
-        seconds=$(awk "BEGIN {printf \"%.9f\", $nsec / 1000000000}")
-        printf 'cn_cpu_core_user_seconds_total{core="%s"}\t%s\n' "$cpu_id" "$seconds"
-    fi
-done
-
 printf '# HELP cn_cpu_core_system_seconds_total CPU time spent in system mode per core\n'
 printf '# TYPE cn_cpu_core_system_seconds_total counter\n'
-for cpu_id in $cpu_ids; do
-    nsec=$(echo "$cpu_stats" | grep "^cpu:${cpu_id}:sys:cpu_nsec_kernel" | awk '{print $2}')
-    if [ -n "$nsec" ]; then
-        seconds=$(awk "BEGIN {printf \"%.9f\", $nsec / 1000000000}")
-        printf 'cn_cpu_core_system_seconds_total{core="%s"}\t%s\n' "$cpu_id" "$seconds"
-    fi
-done
-
 printf '# HELP cn_cpu_core_idle_seconds_total CPU time spent idle per core\n'
 printf '# TYPE cn_cpu_core_idle_seconds_total counter\n'
-for cpu_id in $cpu_ids; do
-    nsec=$(echo "$cpu_stats" | grep "^cpu:${cpu_id}:sys:cpu_nsec_idle" | awk '{print $2}')
-    if [ -n "$nsec" ]; then
-        seconds=$(awk "BEGIN {printf \"%.9f\", $nsec / 1000000000}")
-        printf 'cn_cpu_core_idle_seconds_total{core="%s"}\t%s\n' "$cpu_id" "$seconds"
-    fi
-done
-
 printf '# HELP cn_cpu_core_interrupt_seconds_total CPU time spent servicing interrupts per core\n'
 printf '# TYPE cn_cpu_core_interrupt_seconds_total counter\n'
+
+# Loop through CPUs and output all metrics using array lookups
 for cpu_id in $cpu_ids; do
-    nsec=$(echo "$cpu_stats" | grep "^cpu:${cpu_id}:sys:cpu_nsec_intr" | awk '{print $2}')
-    if [ -n "$nsec" ]; then
-        seconds=$(awk "BEGIN {printf \"%.9f\", $nsec / 1000000000}")
-        printf 'cn_cpu_core_interrupt_seconds_total{core="%s"}\t%s\n' "$cpu_id" "$seconds"
+    if [ -n "${user_sec[$cpu_id]}" ]; then
+        printf 'cn_cpu_core_user_seconds_total{core="%s"}\t%s\n' "$cpu_id" "${user_sec[$cpu_id]}"
+    fi
+    if [ -n "${kernel_sec[$cpu_id]}" ]; then
+        printf 'cn_cpu_core_system_seconds_total{core="%s"}\t%s\n' "$cpu_id" "${kernel_sec[$cpu_id]}"
+    fi
+    if [ -n "${idle_sec[$cpu_id]}" ]; then
+        printf 'cn_cpu_core_idle_seconds_total{core="%s"}\t%s\n' "$cpu_id" "${idle_sec[$cpu_id]}"
+    fi
+    if [ -n "${intr_sec[$cpu_id]}" ]; then
+        printf 'cn_cpu_core_interrupt_seconds_total{core="%s"}\t%s\n' "$cpu_id" "${intr_sec[$cpu_id]}"
     fi
 done
 
