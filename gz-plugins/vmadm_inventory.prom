@@ -95,7 +95,7 @@ while IFS=: read -r uuid alias brand state ram vcpus quota flexible_disk max_swa
     fi
 
     # Build zone info line
-    zone_info_lines="${zone_info_lines}cn_zone_info{uuid=\"${uuid}\",alias=\"${alias}\",brand=\"${brand}\",state=\"${state}\",billing_id=\"${billing_id}\",owner_uuid=\"${owner_uuid}\"}\t1\n"
+    zone_info_lines="${zone_info_lines}cn_zone_info{uuid=\"${uuid}\",alias=\"${alias}\",brand=\"${brand}\",billing_id=\"${billing_id}\",owner_uuid=\"${owner_uuid}\"}\t1\n"
 done <<< "$zone_list"
 
 # Output zone count metrics by brand and state
