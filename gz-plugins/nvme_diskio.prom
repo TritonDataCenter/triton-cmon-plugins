@@ -15,8 +15,8 @@ if [[ -n "$TRACE" ]]; then
     set -o xtrace
 fi
 
-# Get list of disk devices from diskinfo
-# This returns only NVMe disks with format: TYPE DISK VENDOR MODEL SIZE REMOVABLE SOLID_STATE
+# Get list of disk devices from diskinfo. Returns NVMe disks in format: 
+# TYPE DISK VENDOR MODEL SIZE REMOVABLE SOLID_STATE
 disk_list=$(diskinfo -Hp 2>/dev/null | grep "^NVME" | awk '{print $2}' || true)
 
 # shellcheck disable=SC2181
