@@ -99,11 +99,21 @@ while IFS=: read -r uuid alias brand state ram vcpus quota flexible_disk max_swa
 done <<< "$zone_list"
 
 # Output zone count metrics by brand and state
+# Include all possible states (even with 0 count) for consistent time series
 printf '# HELP cn_zone_state Number of zones by brand and state\n'
 printf '# TYPE cn_zone_state gauge\n'
-for key in "${!zone_counts[@]}"; do
-    IFS=',' read -r brand state <<< "$key"
-    printf 'cn_zone_state{brand="%s",state="%s"}\t%d\n' "$brand" "$state" "${zone_counts[$key]}"
+
+# All possible zone brands and states
+brands=("bhyve" "joyent" "lx" "kvm")
+states=("configured" "down" "failed" "incomplete" "installed" "provisioning" "ready" "receiving" "running" "shutting_down" "stopped" "stopping")
+
+# Output all brand/state combinations
+for brand in "${brands[@]}"; do
+    for state in "${states[@]}"; do
+        key="${brand},${state}"
+        count="${zone_counts[$key]:-0}"
+        printf 'cn_zone_state{brand="%s",state="%s"}\t%d\n' "$brand" "$state" "$count"
+    done
 done
 
 # Output per-zone allocation metrics
