@@ -1,34 +1,122 @@
 # OPTION ttl 300
-# HELP cn_zones Number of zones by brand and state
-# TYPE cn_zones gauge
-cn_zones{brand="joyent",state="running"}	3
-cn_zones{brand="bhyve",state="running"}	6
-# HELP cn_zone_allocated_memory_bytes Total memory allocated to all zones in bytes
+# HELP cn_zone_state Number of zones by brand and state
+# TYPE cn_zone_state gauge
+cn_zone_state{brand="bhyve",state="configured"}	0
+cn_zone_state{brand="bhyve",state="down"}	0
+cn_zone_state{brand="bhyve",state="failed"}	0
+cn_zone_state{brand="bhyve",state="incomplete"}	0
+cn_zone_state{brand="bhyve",state="installed"}	0
+cn_zone_state{brand="bhyve",state="provisioning"}	0
+cn_zone_state{brand="bhyve",state="ready"}	0
+cn_zone_state{brand="bhyve",state="receiving"}	0
+cn_zone_state{brand="bhyve",state="running"}	6
+cn_zone_state{brand="bhyve",state="shutting_down"}	0
+cn_zone_state{brand="bhyve",state="stopped"}	0
+cn_zone_state{brand="bhyve",state="stopping"}	0
+cn_zone_state{brand="joyent",state="configured"}	0
+cn_zone_state{brand="joyent",state="down"}	0
+cn_zone_state{brand="joyent",state="failed"}	0
+cn_zone_state{brand="joyent",state="incomplete"}	0
+cn_zone_state{brand="joyent",state="installed"}	0
+cn_zone_state{brand="joyent",state="provisioning"}	0
+cn_zone_state{brand="joyent",state="ready"}	0
+cn_zone_state{brand="joyent",state="receiving"}	0
+cn_zone_state{brand="joyent",state="running"}	3
+cn_zone_state{brand="joyent",state="shutting_down"}	0
+cn_zone_state{brand="joyent",state="stopped"}	0
+cn_zone_state{brand="joyent",state="stopping"}	0
+cn_zone_state{brand="lx",state="configured"}	0
+cn_zone_state{brand="lx",state="down"}	0
+cn_zone_state{brand="lx",state="failed"}	0
+cn_zone_state{brand="lx",state="incomplete"}	0
+cn_zone_state{brand="lx",state="installed"}	0
+cn_zone_state{brand="lx",state="provisioning"}	0
+cn_zone_state{brand="lx",state="ready"}	0
+cn_zone_state{brand="lx",state="receiving"}	0
+cn_zone_state{brand="lx",state="running"}	0
+cn_zone_state{brand="lx",state="shutting_down"}	0
+cn_zone_state{brand="lx",state="stopped"}	0
+cn_zone_state{brand="lx",state="stopping"}	0
+cn_zone_state{brand="kvm",state="configured"}	0
+cn_zone_state{brand="kvm",state="down"}	0
+cn_zone_state{brand="kvm",state="failed"}	0
+cn_zone_state{brand="kvm",state="incomplete"}	0
+cn_zone_state{brand="kvm",state="installed"}	0
+cn_zone_state{brand="kvm",state="provisioning"}	0
+cn_zone_state{brand="kvm",state="ready"}	0
+cn_zone_state{brand="kvm",state="receiving"}	0
+cn_zone_state{brand="kvm",state="running"}	0
+cn_zone_state{brand="kvm",state="shutting_down"}	0
+cn_zone_state{brand="kvm",state="stopped"}	0
+cn_zone_state{brand="kvm",state="stopping"}	0
+# HELP cn_zone_allocated_memory_bytes Memory allocated to zone in bytes
 # TYPE cn_zone_allocated_memory_bytes gauge
-cn_zone_allocated_memory_bytes	210184962048
-# HELP cn_zone_allocated_vcpus Total vCPUs allocated to all zones
+cn_zone_allocated_memory_bytes{uuid="1f4204e6-03a4-4096-9db8-f84f1b5b4b8d"}	4294967296
+cn_zone_allocated_memory_bytes{uuid="a83d6dcb-ee7f-41bd-9ee9-0b9577f9b999"}	4294967296
+cn_zone_allocated_memory_bytes{uuid="aa69a499-dd8e-4459-8bfc-4899c94bab14"}	4294967296
+cn_zone_allocated_memory_bytes{uuid="41e6a368-fa01-40a6-a44f-f450c532c203"}	8589934592
+cn_zone_allocated_memory_bytes{uuid="7a02ed46-24d5-4669-abba-c0748b42fc64"}	17179869184
+cn_zone_allocated_memory_bytes{uuid="83025959-de12-47ae-997c-55e22fdfb444"}	34359738368
+cn_zone_allocated_memory_bytes{uuid="856b2712-6938-4fa1-91a1-a2a169da8fd2"}	34359738368
+cn_zone_allocated_memory_bytes{uuid="b32f777c-acf0-46bb-933e-e25807f039c3"}	34359738368
+cn_zone_allocated_memory_bytes{uuid="8c0b84f5-a9e8-4428-8c0c-c02f2cf2ed3b"}	68451041280
+# HELP cn_zone_allocated_vcpus vCPUs allocated to zone
 # TYPE cn_zone_allocated_vcpus gauge
-cn_zone_allocated_vcpus	45
-# HELP cn_zone_allocated_disk_bytes Total disk quota allocated to all zones in bytes
+cn_zone_allocated_vcpus{uuid="1f4204e6-03a4-4096-9db8-f84f1b5b4b8d"}	1
+cn_zone_allocated_vcpus{uuid="7a02ed46-24d5-4669-abba-c0748b42fc64"}	4
+cn_zone_allocated_vcpus{uuid="83025959-de12-47ae-997c-55e22fdfb444"}	8
+cn_zone_allocated_vcpus{uuid="856b2712-6938-4fa1-91a1-a2a169da8fd2"}	8
+cn_zone_allocated_vcpus{uuid="b32f777c-acf0-46bb-933e-e25807f039c3"}	8
+cn_zone_allocated_vcpus{uuid="8c0b84f5-a9e8-4428-8c0c-c02f2cf2ed3b"}	16
+# HELP cn_zone_allocated_disk_bytes Disk quota allocated to zone in bytes
 # TYPE cn_zone_allocated_disk_bytes gauge
-cn_zone_allocated_disk_bytes	181462368256
-# HELP cn_zone_allocated_flexible_disk_bytes Total flexible disk size allocated to all zones in bytes
+cn_zone_allocated_disk_bytes{uuid="1f4204e6-03a4-4096-9db8-f84f1b5b4b8d"}	1073741824
+cn_zone_allocated_disk_bytes{uuid="a83d6dcb-ee7f-41bd-9ee9-0b9577f9b999"}	53687091200
+cn_zone_allocated_disk_bytes{uuid="aa69a499-dd8e-4459-8bfc-4899c94bab14"}	40802189312
+cn_zone_allocated_disk_bytes{uuid="41e6a368-fa01-40a6-a44f-f450c532c203"}	80530636800
+cn_zone_allocated_disk_bytes{uuid="7a02ed46-24d5-4669-abba-c0748b42fc64"}	1073741824
+cn_zone_allocated_disk_bytes{uuid="83025959-de12-47ae-997c-55e22fdfb444"}	1073741824
+cn_zone_allocated_disk_bytes{uuid="856b2712-6938-4fa1-91a1-a2a169da8fd2"}	1073741824
+cn_zone_allocated_disk_bytes{uuid="b32f777c-acf0-46bb-933e-e25807f039c3"}	1073741824
+cn_zone_allocated_disk_bytes{uuid="8c0b84f5-a9e8-4428-8c0c-c02f2cf2ed3b"}	1073741824
+# HELP cn_zone_allocated_flexible_disk_bytes Flexible disk size allocated to zone in bytes
 # TYPE cn_zone_allocated_flexible_disk_bytes gauge
-cn_zone_allocated_flexible_disk_bytes	2671469658112
-# HELP cn_zone_allocated_swap_bytes Total swap allocated to all zones in bytes
+cn_zone_allocated_flexible_disk_bytes{uuid="1f4204e6-03a4-4096-9db8-f84f1b5b4b8d"}	40802189312
+cn_zone_allocated_flexible_disk_bytes{uuid="7a02ed46-24d5-4669-abba-c0748b42fc64"}	161061273600
+cn_zone_allocated_flexible_disk_bytes{uuid="83025959-de12-47ae-997c-55e22fdfb444"}	1181116006400
+cn_zone_allocated_flexible_disk_bytes{uuid="856b2712-6938-4fa1-91a1-a2a169da8fd2"}	322122547200
+cn_zone_allocated_flexible_disk_bytes{uuid="b32f777c-acf0-46bb-933e-e25807f039c3"}	322122547200
+cn_zone_allocated_flexible_disk_bytes{uuid="8c0b84f5-a9e8-4428-8c0c-c02f2cf2ed3b"}	644245094400
+# HELP cn_zone_allocated_swap_bytes Swap allocated to zone in bytes
 # TYPE cn_zone_allocated_swap_bytes gauge
-cn_zone_allocated_swap_bytes	557599162368
-# HELP cn_zone_allocated_max_lwps Total max lightweight processes allocated to all zones
+cn_zone_allocated_swap_bytes{uuid="1f4204e6-03a4-4096-9db8-f84f1b5b4b8d"}	8589934592
+cn_zone_allocated_swap_bytes{uuid="a83d6dcb-ee7f-41bd-9ee9-0b9577f9b999"}	8589934592
+cn_zone_allocated_swap_bytes{uuid="aa69a499-dd8e-4459-8bfc-4899c94bab14"}	8589934592
+cn_zone_allocated_swap_bytes{uuid="41e6a368-fa01-40a6-a44f-f450c532c203"}	17179869184
+cn_zone_allocated_swap_bytes{uuid="7a02ed46-24d5-4669-abba-c0748b42fc64"}	34150023168
+cn_zone_allocated_swap_bytes{uuid="83025959-de12-47ae-997c-55e22fdfb444"}	68719476736
+cn_zone_allocated_swap_bytes{uuid="856b2712-6938-4fa1-91a1-a2a169da8fd2"}	137438953472
+cn_zone_allocated_swap_bytes{uuid="b32f777c-acf0-46bb-933e-e25807f039c3"}	137438953472
+cn_zone_allocated_swap_bytes{uuid="8c0b84f5-a9e8-4428-8c0c-c02f2cf2ed3b"}	136902082560
+# HELP cn_zone_allocated_max_lwps Max lightweight processes allocated to zone
 # TYPE cn_zone_allocated_max_lwps gauge
-cn_zone_allocated_max_lwps	44384
+cn_zone_allocated_max_lwps{uuid="1f4204e6-03a4-4096-9db8-f84f1b5b4b8d"}	4000
+cn_zone_allocated_max_lwps{uuid="a83d6dcb-ee7f-41bd-9ee9-0b9577f9b999"}	8192
+cn_zone_allocated_max_lwps{uuid="aa69a499-dd8e-4459-8bfc-4899c94bab14"}	4000
+cn_zone_allocated_max_lwps{uuid="41e6a368-fa01-40a6-a44f-f450c532c203"}	4000
+cn_zone_allocated_max_lwps{uuid="7a02ed46-24d5-4669-abba-c0748b42fc64"}	4000
+cn_zone_allocated_max_lwps{uuid="83025959-de12-47ae-997c-55e22fdfb444"}	8192
+cn_zone_allocated_max_lwps{uuid="856b2712-6938-4fa1-91a1-a2a169da8fd2"}	4000
+cn_zone_allocated_max_lwps{uuid="b32f777c-acf0-46bb-933e-e25807f039c3"}	4000
+cn_zone_allocated_max_lwps{uuid="8c0b84f5-a9e8-4428-8c0c-c02f2cf2ed3b"}	4000
 # HELP cn_zone_info Zone information with labels
 # TYPE cn_zone_info gauge
-cn_zone_info{uuid="1f4204e6-03a4-4096-9db8-f84f1b5b4b8d",alias="dev-webserver",brand="bhyve",state="running",billing_id="75fe7c5c-c2b4-4fc9-b5f5-c4f69b37d32f",owner_uuid="01f842b9-6415-4b92-89e5-f35bdd52150c"}	1
-cn_zone_info{uuid="a83d6dcb-ee7f-41bd-9ee9-0b9577f9b999",alias="em7h1fewref3w-lb-f7xm3yg3shde-nvka",brand="joyent",state="running",billing_id="5e74772d-8663-491f-90dd-1bf7b1939f45",owner_uuid="1bfca979-16d4-49d7-90db-cb70fc1da870"}	1
-cn_zone_info{uuid="aa69a499-dd8e-4459-8bfc-4899c94bab14",alias="piranha-portal-aa69a499",brand="joyent",state="running",billing_id="75fe7c5c-c2b4-4fc9-b5f5-c4f69b37d32f",owner_uuid="56231556-2e6d-4d9a-9ca8-83536a6223e5"}	1
-cn_zone_info{uuid="41e6a368-fa01-40a6-a44f-f450c532c203",alias="41e6a368",brand="joyent",state="running",billing_id="27c55576-8004-11ee-84a3-40a6b72259f8",owner_uuid="7a53ef65-3ed6-400b-a66a-e200df261ec9"}	1
-cn_zone_info{uuid="7a02ed46-24d5-4669-abba-c0748b42fc64",alias="rancher001",brand="bhyve",state="running",billing_id="a8812006-290d-4ae5-892e-d8b5f200ccee",owner_uuid="4e5b4003-a70c-4775-8083-863a6b298285"}	1
-cn_zone_info{uuid="83025959-de12-47ae-997c-55e22fdfb444",alias="1a-telemetry-k0s-prd-04",brand="bhyve",state="running",billing_id="fc6b0e77-c8ca-4b57-b0db-7ca7da0774ab",owner_uuid="e5f78872-a966-41f9-b042-7ec8e4a2f4c5"}	1
-cn_zone_info{uuid="856b2712-6938-4fa1-91a1-a2a169da8fd2",alias="testnet-sentry-2",brand="bhyve",state="running",billing_id="553db434-f9a5-b2ef-ee26-507e00434f1d",owner_uuid="a098651e-6025-4c28-89bb-6cd399055ce3"}	1
-cn_zone_info{uuid="b32f777c-acf0-46bb-933e-e25807f039c3",alias="1a-k8s-dev-6",brand="bhyve",state="running",billing_id="c12804a4-7acc-4cf2-841c-0ec55a8ae7c7",owner_uuid="3a666c03-1be7-49a7-95fb-a0342de88504"}	1
-cn_zone_info{uuid="8c0b84f5-a9e8-4428-8c0c-c02f2cf2ed3b",alias="gptxfsfgphz58-0wb2w-da11-prod-pool-1",brand="bhyve",state="running",billing_id="d65e3afd-c024-42a5-97d9-a50ad2f300c0",owner_uuid="be8063ec-8367-480a-89dc-30149f85aafb"}	1
+cn_zone_info{uuid="1f4204e6-03a4-4096-9db8-f84f1b5b4b8d",alias="dev-webserver",brand="bhyve",billing_id="75fe7c5c-c2b4-4fc9-b5f5-c4f69b37d32f",owner_uuid="01f842b9-6415-4b92-89e5-f35bdd52150c"}	1
+cn_zone_info{uuid="a83d6dcb-ee7f-41bd-9ee9-0b9577f9b999",alias="em7h1fewref3w-lb-f7xm3yg3shde-nvka",brand="joyent",billing_id="5e74772d-8663-491f-90dd-1bf7b1939f45",owner_uuid="1bfca979-16d4-49d7-90db-cb70fc1da870"}	1
+cn_zone_info{uuid="aa69a499-dd8e-4459-8bfc-4899c94bab14",alias="piranha-portal-aa69a499",brand="joyent",billing_id="75fe7c5c-c2b4-4fc9-b5f5-c4f69b37d32f",owner_uuid="56231556-2e6d-4d9a-9ca8-83536a6223e5"}	1
+cn_zone_info{uuid="41e6a368-fa01-40a6-a44f-f450c532c203",alias="41e6a368",brand="joyent",billing_id="27c55576-8004-11ee-84a3-40a6b72259f8",owner_uuid="7a53ef65-3ed6-400b-a66a-e200df261ec9"}	1
+cn_zone_info{uuid="7a02ed46-24d5-4669-abba-c0748b42fc64",alias="rancher001",brand="bhyve",billing_id="a8812006-290d-4ae5-892e-d8b5f200ccee",owner_uuid="4e5b4003-a70c-4775-8083-863a6b298285"}	1
+cn_zone_info{uuid="83025959-de12-47ae-997c-55e22fdfb444",alias="1a-telemetry-k0s-prd-04",brand="bhyve",billing_id="fc6b0e77-c8ca-4b57-b0db-7ca7da0774ab",owner_uuid="e5f78872-a966-41f9-b042-7ec8e4a2f4c5"}	1
+cn_zone_info{uuid="856b2712-6938-4fa1-91a1-a2a169da8fd2",alias="testnet-sentry-2",brand="bhyve",billing_id="553db434-f9a5-b2ef-ee26-507e00434f1d",owner_uuid="a098651e-6025-4c28-89bb-6cd399055ce3"}	1
+cn_zone_info{uuid="b32f777c-acf0-46bb-933e-e25807f039c3",alias="1a-k8s-dev-6",brand="bhyve",billing_id="c12804a4-7acc-4cf2-841c-0ec55a8ae7c7",owner_uuid="3a666c03-1be7-49a7-95fb-a0342de88504"}	1
+cn_zone_info{uuid="8c0b84f5-a9e8-4428-8c0c-c02f2cf2ed3b",alias="gptxfsfgphz58-0wb2w-da11-prod-pool-1",brand="bhyve",billing_id="d65e3afd-c024-42a5-97d9-a50ad2f300c0",owner_uuid="be8063ec-8367-480a-89dc-30149f85aafb"}	1
