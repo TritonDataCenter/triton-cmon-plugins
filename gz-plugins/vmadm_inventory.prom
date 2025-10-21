@@ -29,15 +29,15 @@ printf '# OPTION ttl 300\n'
 
 # Initialize counters for zone counts by brand and state
 declare -A zone_counts
-total_ram=0
-total_vcpus=0
-total_quota=0
-total_flexible_disk=0
-total_swap=0
-total_max_lwps=0
 
-# Track zone info for info metrics
+# Track zone info and allocation metrics
 zone_info_lines=""
+zone_memory_lines=""
+zone_vcpus_lines=""
+zone_disk_lines=""
+zone_flexible_disk_lines=""
+zone_swap_lines=""
+zone_lwps_lines=""
 
 # Process each zone (vmadm list -p outputs colon-separated fields)
 while IFS=: read -r uuid alias brand state ram vcpus quota flexible_disk max_swap max_lwps billing_id owner_uuid; do
@@ -59,39 +59,39 @@ while IFS=: read -r uuid alias brand state ram vcpus quota flexible_disk max_swa
     fi
     zone_counts[$key]=$((zone_counts[$key] + 1))
 
-    # Sum up resource allocations (for all zones, not just running)
+    # Build per-zone allocation metrics
     # RAM is in MiB, convert to bytes
     if [ "$ram" != "0" ]; then
         ram_bytes=$((ram * 1048576))
-        total_ram=$((total_ram + ram_bytes))
+        zone_memory_lines="${zone_memory_lines}cn_zone_allocated_memory_bytes{uuid=\"${uuid}\"}\t${ram_bytes}\n"
     fi
 
     # VCPUs
     if [ "$vcpus" != "0" ]; then
-        total_vcpus=$((total_vcpus + vcpus))
+        zone_vcpus_lines="${zone_vcpus_lines}cn_zone_allocated_vcpus{uuid=\"${uuid}\"}\t${vcpus}\n"
     fi
 
     # Quota is in GiB, convert to bytes
     if [ "$quota" != "0" ]; then
         quota_bytes=$((quota * 1073741824))
-        total_quota=$((total_quota + quota_bytes))
+        zone_disk_lines="${zone_disk_lines}cn_zone_allocated_disk_bytes{uuid=\"${uuid}\"}\t${quota_bytes}\n"
     fi
 
     # Flexible disk size is in MiB, convert to bytes
     if [ "$flexible_disk" != "0" ]; then
         flexible_disk_bytes=$((flexible_disk * 1048576))
-        total_flexible_disk=$((total_flexible_disk + flexible_disk_bytes))
+        zone_flexible_disk_lines="${zone_flexible_disk_lines}cn_zone_allocated_flexible_disk_bytes{uuid=\"${uuid}\"}\t${flexible_disk_bytes}\n"
     fi
 
     # Max swap is in MiB, convert to bytes
     if [ "$max_swap" != "0" ]; then
         max_swap_bytes=$((max_swap * 1048576))
-        total_swap=$((total_swap + max_swap_bytes))
+        zone_swap_lines="${zone_swap_lines}cn_zone_allocated_swap_bytes{uuid=\"${uuid}\"}\t${max_swap_bytes}\n"
     fi
 
     # Max lwps
     if [ "$max_lwps" != "0" ]; then
-        total_max_lwps=$((total_max_lwps + max_lwps))
+        zone_lwps_lines="${zone_lwps_lines}cn_zone_allocated_max_lwps{uuid=\"${uuid}\"}\t${max_lwps}\n"
     fi
 
     # Build zone info line
@@ -106,30 +106,30 @@ for key in "${!zone_counts[@]}"; do
     printf 'cn_zone_state{brand="%s",state="%s"}\t%d\n' "$brand" "$state" "${zone_counts[$key]}"
 done
 
-# Output resource allocation totals
-printf '# HELP cn_zone_allocated_memory_bytes Total memory allocated to all zones in bytes\n'
+# Output per-zone allocation metrics
+printf '# HELP cn_zone_allocated_memory_bytes Memory allocated to zone in bytes\n'
 printf '# TYPE cn_zone_allocated_memory_bytes gauge\n'
-printf 'cn_zone_allocated_memory_bytes\t%d\n' "$total_ram"
+printf '%b' "$zone_memory_lines"
 
-printf '# HELP cn_zone_allocated_vcpus Total vCPUs allocated to all zones\n'
+printf '# HELP cn_zone_allocated_vcpus vCPUs allocated to zone\n'
 printf '# TYPE cn_zone_allocated_vcpus gauge\n'
-printf 'cn_zone_allocated_vcpus\t%d\n' "$total_vcpus"
+printf '%b' "$zone_vcpus_lines"
 
-printf '# HELP cn_zone_allocated_disk_bytes Total disk quota allocated to all zones in bytes\n'
+printf '# HELP cn_zone_allocated_disk_bytes Disk quota allocated to zone in bytes\n'
 printf '# TYPE cn_zone_allocated_disk_bytes gauge\n'
-printf 'cn_zone_allocated_disk_bytes\t%d\n' "$total_quota"
+printf '%b' "$zone_disk_lines"
 
-printf '# HELP cn_zone_allocated_flexible_disk_bytes Total flexible disk size allocated to all zones in bytes\n'
+printf '# HELP cn_zone_allocated_flexible_disk_bytes Flexible disk size allocated to zone in bytes\n'
 printf '# TYPE cn_zone_allocated_flexible_disk_bytes gauge\n'
-printf 'cn_zone_allocated_flexible_disk_bytes\t%d\n' "$total_flexible_disk"
+printf '%b' "$zone_flexible_disk_lines"
 
-printf '# HELP cn_zone_allocated_swap_bytes Total swap allocated to all zones in bytes\n'
+printf '# HELP cn_zone_allocated_swap_bytes Swap allocated to zone in bytes\n'
 printf '# TYPE cn_zone_allocated_swap_bytes gauge\n'
-printf 'cn_zone_allocated_swap_bytes\t%d\n' "$total_swap"
+printf '%b' "$zone_swap_lines"
 
-printf '# HELP cn_zone_allocated_max_lwps Total max lightweight processes allocated to all zones\n'
+printf '# HELP cn_zone_allocated_max_lwps Max lightweight processes allocated to zone\n'
 printf '# TYPE cn_zone_allocated_max_lwps gauge\n'
-printf 'cn_zone_allocated_max_lwps\t%d\n' "$total_max_lwps"
+printf '%b' "$zone_lwps_lines"
 
 # Output zone info metrics
 printf '# HELP cn_zone_info Zone information with labels\n'
