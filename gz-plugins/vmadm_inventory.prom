@@ -99,11 +99,11 @@ while IFS=: read -r uuid alias brand state ram vcpus quota flexible_disk max_swa
 done <<< "$zone_list"
 
 # Output zone count metrics by brand and state
-printf '# HELP cn_zones Number of zones by brand and state\n'
-printf '# TYPE cn_zones gauge\n'
+printf '# HELP cn_zone_state Number of zones by brand and state\n'
+printf '# TYPE cn_zone_state gauge\n'
 for key in "${!zone_counts[@]}"; do
     IFS=',' read -r brand state <<< "$key"
-    printf 'cn_zones{brand="%s",state="%s"}\t%d\n' "$brand" "$state" "${zone_counts[$key]}"
+    printf 'cn_zone_state{brand="%s",state="%s"}\t%d\n' "$brand" "$state" "${zone_counts[$key]}"
 done
 
 # Output resource allocation totals
