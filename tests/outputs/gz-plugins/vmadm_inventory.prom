@@ -73,11 +73,11 @@ cn_zone_info{uuid="8c0b84f5-a9e8-4428-8c0c-c02f2cf2ed3b",alias="gptxfsfgphz58-0w
 # HELP cn_zone_state Zone state (0=running, 1=stopped, 2=ready, 3=installed, 4=configured, 5=provisioning, 6=receiving, 7=stopping, 8=shutting_down, 9=incomplete, 10=down, 11=failed, 99=unknown)
 # TYPE cn_zone_state gauge
 cn_zone_state{uuid="1f4204e6-03a4-4096-9db8-f84f1b5b4b8d"}	0
-cn_zone_state{uuid="a83d6dcb-ee7f-41bd-9ee9-0b9577f9b999"}	0
-cn_zone_state{uuid="aa69a499-dd8e-4459-8bfc-4899c94bab14"}	0
-cn_zone_state{uuid="41e6a368-fa01-40a6-a44f-f450c532c203"}	0
-cn_zone_state{uuid="7a02ed46-24d5-4669-abba-c0748b42fc64"}	0
-cn_zone_state{uuid="83025959-de12-47ae-997c-55e22fdfb444"}	0
-cn_zone_state{uuid="856b2712-6938-4fa1-91a1-a2a169da8fd2"}	0
-cn_zone_state{uuid="b32f777c-acf0-46bb-933e-e25807f039c3"}	0
-cn_zone_state{uuid="8c0b84f5-a9e8-4428-8c0c-c02f2cf2ed3b"}	0
+cn_zone_state{uuid="a83d6dcb-ee7f-41bd-9ee9-0b9577f9b999"}	1
+cn_zone_state{uuid="aa69a499-dd8e-4459-8bfc-4899c94bab14"}	2
+cn_zone_state{uuid="41e6a368-fa01-40a6-a44f-f450c532c203"}	3
+cn_zone_state{uuid="7a02ed46-24d5-4669-abba-c0748b42fc64"}	4
+cn_zone_state{uuid="83025959-de12-47ae-997c-55e22fdfb444"}	5
+cn_zone_state{uuid="856b2712-6938-4fa1-91a1-a2a169da8fd2"}	6
+cn_zone_state{uuid="b32f777c-acf0-46bb-933e-e25807f039c3"}	7
+cn_zone_state{uuid="8c0b84f5-a9e8-4428-8c0c-c02f2cf2ed3b"}	8
