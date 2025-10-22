@@ -24,14 +24,9 @@ if [ -z "$zone_list" ]; then
     exit 0
 fi
 
-# Set TTL to 300 seconds (5 minutes) since vmadm operations are expensive
-printf '# OPTION ttl 300\n'
-
-# Initialize counters for zone counts by brand and state
-declare -A zone_counts
-
 # Track zone info and allocation metrics
 zone_info_lines=""
+zone_state_lines=""
 zone_memory_lines=""
 zone_vcpus_lines=""
 zone_disk_lines=""
@@ -52,12 +47,6 @@ while IFS=: read -r uuid alias brand state ram vcpus quota flexible_disk max_swa
     [ -z "$max_swap" ] && max_swap="0"
     [ -z "$max_lwps" ] && max_lwps="0"
 
-    # Count zones by brand and state
-    key="${brand},${state}"
-    if [ -z "${zone_counts[$key]}" ]; then
-        zone_counts[$key]=0
-    fi
-    zone_counts[$key]=$((zone_counts[$key] + 1))
 
     # Build per-zone allocation metrics
     # RAM is in MiB, convert to bytes
@@ -96,25 +85,31 @@ while IFS=: read -r uuid alias brand state ram vcpus quota flexible_disk max_swa
 
     # Build zone info line
     zone_info_lines="${zone_info_lines}cn_zone_info{uuid=\"${uuid}\",alias=\"${alias}\",brand=\"${brand}\",billing_id=\"${billing_id}\",owner_uuid=\"${owner_uuid}\"}\t1\n"
+
+    # Map state to numeric code (healthy states = lower numbers, unhealthy = higher)
+    case "$state" in
+        "running")         state_code=0 ;;
+        "stopped")         state_code=1 ;;
+        "ready")           state_code=2 ;;
+        "installed")       state_code=3 ;;
+        "configured")      state_code=4 ;;
+        "provisioning")    state_code=5 ;;
+        "receiving")       state_code=6 ;;
+        "stopping")        state_code=7 ;;
+        "shutting_down")   state_code=8 ;;
+        "incomplete")      state_code=9 ;;
+        "down")            state_code=10 ;;
+        "failed")          state_code=11 ;;
+        *)                 state_code=99 ;;  # Unknown state
+    esac
+
+    # Build per-zone state line (single metric with numeric value)
+    zone_state_lines="${zone_state_lines}cn_zone_state{uuid=\"${uuid}\"}\t${state_code}\n"
 done <<< "$zone_list"
 
-# Output zone count metrics by brand and state
-# Include all possible states (even with 0 count) for consistent time series
-printf '# HELP cn_zone_state Number of zones by brand and state\n'
-printf '# TYPE cn_zone_state gauge\n'
 
-# All possible zone brands and states
-brands=("bhyve" "joyent" "lx" "kvm")
-states=("configured" "down" "failed" "incomplete" "installed" "provisioning" "ready" "receiving" "running" "shutting_down" "stopped" "stopping")
-
-# Output all brand/state combinations
-for brand in "${brands[@]}"; do
-    for state in "${states[@]}"; do
-        key="${brand},${state}"
-        count="${zone_counts[$key]:-0}"
-        printf 'cn_zone_state{brand="%s",state="%s"}\t%d\n' "$brand" "$state" "$count"
-    done
-done
+# Set TTL to 300 seconds (5 minutes) since vmadm operations are expensive
+printf '# OPTION ttl 300\n'
 
 # Output per-zone allocation metrics
 printf '# HELP cn_zone_allocated_memory_bytes Memory allocated to zone in bytes\n'
@@ -145,3 +140,8 @@ printf '%b' "$zone_lwps_lines"
 printf '# HELP cn_zone_info Zone information with labels\n'
 printf '# TYPE cn_zone_info gauge\n'
 printf '%b' "$zone_info_lines"
+
+# Output per-zone state metrics
+printf '# HELP cn_zone_state Zone state (0=running, 1=stopped, 2=ready, 3=installed, 4=configured, 5=provisioning, 6=receiving, 7=stopping, 8=shutting_down, 9=incomplete, 10=down, 11=failed, 99=unknown)\n'
+printf '# TYPE cn_zone_state gauge\n'
+printf '%b' "$zone_state_lines"
