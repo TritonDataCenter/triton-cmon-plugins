@@ -30,7 +30,7 @@ zone_state_lines=""
 zone_memory_lines=""
 zone_vcpus_lines=""
 zone_cpu_cap_lines=""
-zone_disk_lines=""
+zone_quota_lines=""
 zone_flexible_disk_lines=""
 zone_swap_lines=""
 zone_lwps_lines=""
@@ -70,7 +70,7 @@ while IFS=: read -r uuid alias brand state ram vcpus cpu_cap quota flexible_disk
     # Quota is in GiB, convert to bytes
     if [ "$quota" != "0" ]; then
         quota_bytes=$((quota * 1073741824))
-        zone_disk_lines="${zone_disk_lines}cn_zone_allocated_disk_bytes{uuid=\"${uuid}\"}\t${quota_bytes}\n"
+        zone_quota_lines="${zone_quota_lines}cn_zone_allocated_quota_bytes{uuid=\"${uuid}\"}\t${quota_bytes}\n"
     fi
 
     # Flexible disk size is in MiB, convert to bytes
@@ -131,9 +131,9 @@ printf '# HELP cn_zone_allocated_cpu_cap cpu_cap allocated to zone\n'
 printf '# TYPE cn_zone_allocated_cpu_cap gauge\n'
 printf '%b' "$zone_cpu_cap_lines"
 
-printf '# HELP cn_zone_allocated_disk_bytes Disk quota allocated to zone in bytes\n'
-printf '# TYPE cn_zone_allocated_disk_bytes gauge\n'
-printf '%b' "$zone_disk_lines"
+printf '# HELP cn_zone_allocated_quota_bytes Disk quota allocated to zone in bytes\n'
+printf '# TYPE cn_zone_allocated_quota_bytes gauge\n'
+printf '%b' "$zone_quota_lines"
 
 printf '# HELP cn_zone_allocated_flexible_disk_bytes Flexible disk size allocated to zone in bytes\n'
 printf '# TYPE cn_zone_allocated_flexible_disk_bytes gauge\n'

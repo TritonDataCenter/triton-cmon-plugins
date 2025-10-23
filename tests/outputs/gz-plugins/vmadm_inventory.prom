@@ -35,19 +35,19 @@ cn_zone_allocated_cpu_cap{uuid="b32f777c-acf0-46bb-933e-e25807f039c3"}	800
 cn_zone_allocated_cpu_cap{uuid="0b319f42-dbbd-441d-a142-6e0217088875"}	1600
 cn_zone_allocated_cpu_cap{uuid="8c0b84f5-a9e8-4428-8c0c-c02f2cf2ed3b"}	1600
 cn_zone_allocated_cpu_cap{uuid="9bb5e00f-e19a-40b5-9076-62151ff363dd"}	1600
-# HELP cn_zone_allocated_disk_bytes Disk quota allocated to zone in bytes
-# TYPE cn_zone_allocated_disk_bytes gauge
-cn_zone_allocated_disk_bytes{uuid="1f4204e6-03a4-4096-9db8-f84f1b5b4b8d"}	1073741824
-cn_zone_allocated_disk_bytes{uuid="a83d6dcb-ee7f-41bd-9ee9-0b9577f9b999"}	53687091200
-cn_zone_allocated_disk_bytes{uuid="aa69a499-dd8e-4459-8bfc-4899c94bab14"}	40802189312
-cn_zone_allocated_disk_bytes{uuid="41e6a368-fa01-40a6-a44f-f450c532c203"}	80530636800
-cn_zone_allocated_disk_bytes{uuid="7a02ed46-24d5-4669-abba-c0748b42fc64"}	1073741824
-cn_zone_allocated_disk_bytes{uuid="83025959-de12-47ae-997c-55e22fdfb444"}	1073741824
-cn_zone_allocated_disk_bytes{uuid="856b2712-6938-4fa1-91a1-a2a169da8fd2"}	1073741824
-cn_zone_allocated_disk_bytes{uuid="b32f777c-acf0-46bb-933e-e25807f039c3"}	1073741824
-cn_zone_allocated_disk_bytes{uuid="0b319f42-dbbd-441d-a142-6e0217088875"}	1073741824
-cn_zone_allocated_disk_bytes{uuid="8c0b84f5-a9e8-4428-8c0c-c02f2cf2ed3b"}	1073741824
-cn_zone_allocated_disk_bytes{uuid="9bb5e00f-e19a-40b5-9076-62151ff363dd"}	1073741824
+# HELP cn_zone_allocated_quota_bytes Disk quota allocated to zone in bytes
+# TYPE cn_zone_allocated_quota_bytes gauge
+cn_zone_allocated_quota_bytes{uuid="1f4204e6-03a4-4096-9db8-f84f1b5b4b8d"}	1073741824
+cn_zone_allocated_quota_bytes{uuid="a83d6dcb-ee7f-41bd-9ee9-0b9577f9b999"}	53687091200
+cn_zone_allocated_quota_bytes{uuid="aa69a499-dd8e-4459-8bfc-4899c94bab14"}	40802189312
+cn_zone_allocated_quota_bytes{uuid="41e6a368-fa01-40a6-a44f-f450c532c203"}	80530636800
+cn_zone_allocated_quota_bytes{uuid="7a02ed46-24d5-4669-abba-c0748b42fc64"}	1073741824
+cn_zone_allocated_quota_bytes{uuid="83025959-de12-47ae-997c-55e22fdfb444"}	1073741824
+cn_zone_allocated_quota_bytes{uuid="856b2712-6938-4fa1-91a1-a2a169da8fd2"}	1073741824
+cn_zone_allocated_quota_bytes{uuid="b32f777c-acf0-46bb-933e-e25807f039c3"}	1073741824
+cn_zone_allocated_quota_bytes{uuid="0b319f42-dbbd-441d-a142-6e0217088875"}	1073741824
+cn_zone_allocated_quota_bytes{uuid="8c0b84f5-a9e8-4428-8c0c-c02f2cf2ed3b"}	1073741824
+cn_zone_allocated_quota_bytes{uuid="9bb5e00f-e19a-40b5-9076-62151ff363dd"}	1073741824
 # HELP cn_zone_allocated_flexible_disk_bytes Flexible disk size allocated to zone in bytes
 # TYPE cn_zone_allocated_flexible_disk_bytes gauge
 cn_zone_allocated_flexible_disk_bytes{uuid="1f4204e6-03a4-4096-9db8-f84f1b5b4b8d"}	40802189312
