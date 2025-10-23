@@ -1,0 +1,113 @@
+#!/usr/bin/env bash
+
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
+# Copyright 2025 Edgecast Cloud LLC.
+
+set -o errexit
+set -o pipefail
+
+# shellcheck disable=SC2154
+if [[ -n "$TRACE" ]]; then
+    export PS4='[\D{%FT%TZ}] ${BASH_SOURCE}:${LINENO}: ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
+    set -o xtrace
+fi
+
+# Get list of disk devices from diskinfo. Returns NVMe disks in format: 
+# TYPE DISK VENDOR MODEL SIZE REMOVABLE SOLID_STATE
+disk_list=$(diskinfo -Hp 2>/dev/null | grep "^NVME" | awk '{print $2}' || true)
+
+# shellcheck disable=SC2181
+if [ -z "$disk_list" ]; then
+    # If diskinfo fails or returns no disks, exit silently
+    exit 0
+fi
+
+first_disk=true
+
+# Set TTL to 0 seconds to ensure accurate rate calculations
+printf '# OPTION ttl 0\n'
+# Process each disk
+for disk in $disk_list; do
+    # Try to get statistics from kstat using blkdev module
+    # We need to find the blkdev instance for this disk
+    # The kstat name format is blkdev:instance:name:stat
+
+    # Get all blkdev stats and filter for this disk
+    stats=$(kstat -p "blkdev:::nread" \
+                     "blkdev:::nwritten" \
+                     "blkdev:::reads" \
+                     "blkdev:::writes" \
+                     "blkdev:::rtime" \
+                     "blkdev:::wtime" 2>/dev/null || true)
+
+    if [ -z "$stats" ]; then
+        continue
+    fi
+
+    # For simplicity, we'll use a counter approach
+    # Since we can't easily map disk names to blkdev instances,
+    # we'll iterate through blkdev instances in order
+    instance=$(echo "$disk_list" | grep -n "^$disk\$" | cut -d: -f1)
+    # Adjust for 0-based indexing
+    instance=$((instance - 1))
+
+    # Get stats for this instance
+    nread=$(echo "$stats" | grep "blkdev:${instance}:" | grep ':nread' | awk '{print $2}')
+    nwritten=$(echo "$stats" | grep "blkdev:${instance}:" | grep ':nwritten' | awk '{print $2}')
+    reads=$(echo "$stats" | grep "blkdev:${instance}:" | grep ':reads' | awk '{print $2}')
+    writes=$(echo "$stats" | grep "blkdev:${instance}:" | grep ':writes' | awk '{print $2}')
+    rtime=$(echo "$stats" | grep "blkdev:${instance}:" | grep ':rtime' | awk '{print $2}')
+    wtime=$(echo "$stats" | grep "blkdev:${instance}:" | grep ':wtime' | awk '{print $2}')
+
+    # Skip if we didn't find stats for this instance
+    if [ -z "$nread" ]; then
+        continue
+    fi
+
+    # Convert nanoseconds to seconds (divide by 1000000000)
+    rtime_seconds=$(awk "BEGIN {printf \"%.9f\", $rtime / 1000000000}")
+    wtime_seconds=$(awk "BEGIN {printf \"%.9f\", $wtime / 1000000000}")
+
+    # Output metrics with disk label
+    # Only output HELP and TYPE once (for first disk)
+    if [ "$first_disk" = true ]; then
+        printf '# HELP cn_disk_reads_total Total disk read operations\n'
+        printf '# TYPE cn_disk_reads_total counter\n'
+    fi
+    printf 'cn_disk_reads_total{disk="%s"}\t%d\n' "$disk" "$reads"
+
+    if [ "$first_disk" = true ]; then
+        printf '# HELP cn_disk_writes_total Total disk write operations\n'
+        printf '# TYPE cn_disk_writes_total counter\n'
+    fi
+    printf 'cn_disk_writes_total{disk="%s"}\t%d\n' "$disk" "$writes"
+
+    if [ "$first_disk" = true ]; then
+        printf '# HELP cn_disk_read_bytes_total Total bytes read from disk\n'
+        printf '# TYPE cn_disk_read_bytes_total counter\n'
+    fi
+    printf 'cn_disk_read_bytes_total{disk="%s"}\t%d\n' "$disk" "$nread"
+
+    if [ "$first_disk" = true ]; then
+        printf '# HELP cn_disk_write_bytes_total Total bytes written to disk\n'
+        printf '# TYPE cn_disk_write_bytes_total counter\n'
+    fi
+    printf 'cn_disk_write_bytes_total{disk="%s"}\t%d\n' "$disk" "$nwritten"
+
+    if [ "$first_disk" = true ]; then
+        printf '# HELP cn_disk_read_time_seconds_total Total time spent reading from disk in seconds\n'
+        printf '# TYPE cn_disk_read_time_seconds_total counter\n'
+    fi
+    printf 'cn_disk_read_time_seconds_total{disk="%s"}\t%s\n' "$disk" "$rtime_seconds"
+
+    if [ "$first_disk" = true ]; then
+        printf '# HELP cn_disk_write_time_seconds_total Total time spent writing to disk in seconds\n'
+        printf '# TYPE cn_disk_write_time_seconds_total counter\n'
+    fi
+    printf 'cn_disk_write_time_seconds_total{disk="%s"}\t%s\n' "$disk" "$wtime_seconds"
+
+    first_disk=false
+done

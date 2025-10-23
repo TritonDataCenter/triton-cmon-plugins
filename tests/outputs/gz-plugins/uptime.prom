@@ -1,0 +1,4 @@
+# OPTION ttl 0
+# HELP plugin_uptime_seconds_total System uptime in seconds
+# TYPE plugin_uptime_seconds_total counter
+plugin_uptime_seconds_total	19010734

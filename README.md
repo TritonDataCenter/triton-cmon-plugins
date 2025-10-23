@@ -70,5 +70,5 @@ also create an appropriate `mock` tool to simulate its output for use with
 
 ## Releasing
 
-Run `make release` and a new release will be created and pushed to GitHub.
-You'll need the `hub` command, and be a member of the Joyent organization.
+Run `make release-gh-cli` and a new release will be created and pushed to GitHub.
+One must have GitHub CLI installed (`gh`), and must be a member of the [TritonDataCenter](https://github.com/TritonDataCenter) organization for this to succeed. 

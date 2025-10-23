@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -19,7 +19,7 @@ fi
 zfs_output=$(zfs list -Hpo used,available,quota zones 2>/dev/null)
 
 # shellcheck disable=SC2181
-if [ $? -ne 0 ]; then
+if [ -z "$zfs_output" ]; then
     # If zfs command fails, display nothing
     exit 0
 fi

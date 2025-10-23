@@ -1,0 +1,43 @@
+#!/bin/bash
+cat <<EOF
+0	on-line   since 11/18/2024 11:25:32
+1	on-line   since 11/18/2024 11:25:32
+2	on-line   since 11/18/2024 11:25:32
+3	on-line   since 11/18/2024 11:25:32
+4	on-line   since 11/18/2024 11:25:32
+5	on-line   since 11/18/2024 11:25:32
+6	on-line   since 11/18/2024 11:25:32
+7	on-line   since 11/18/2024 11:25:32
+8	on-line   since 11/18/2024 11:25:32
+9	on-line   since 11/18/2024 11:25:32
+10	on-line   since 11/18/2024 11:25:32
+11	on-line   since 11/18/2024 11:25:32
+12	on-line   since 11/18/2024 11:25:32
+13	on-line   since 11/18/2024 11:25:32
+14	on-line   since 11/18/2024 11:25:32
+15	on-line   since 11/18/2024 11:25:33
+16	on-line   since 11/18/2024 11:25:33
+17	on-line   since 11/18/2024 11:25:33
+18	on-line   since 11/18/2024 11:25:33
+19	on-line   since 11/18/2024 11:25:33
+20	on-line   since 11/18/2024 11:25:33
+21	on-line   since 11/18/2024 11:25:33
+22	on-line   since 11/18/2024 11:25:33
+23	on-line   since 11/18/2024 11:25:33
+24	on-line   since 11/18/2024 11:25:33
+25	on-line   since 11/18/2024 11:25:33
+26	on-line   since 11/18/2024 11:25:33
+27	on-line   since 11/18/2024 11:25:33
+28	on-line   since 11/18/2024 11:25:33
+29	on-line   since 11/18/2024 11:25:33
+30	on-line   since 11/18/2024 11:25:33
+31	on-line   since 11/18/2024 11:25:33
+32	on-line   since 11/18/2024 11:25:33
+33	on-line   since 11/18/2024 11:25:33
+34	on-line   since 11/18/2024 11:25:33
+35	on-line   since 11/18/2024 11:25:33
+36	on-line   since 11/18/2024 11:25:33
+37	on-line   since 11/18/2024 11:25:33
+38	on-line   since 11/18/2024 11:25:33
+39	on-line   since 11/18/2024 11:25:33
+EOF

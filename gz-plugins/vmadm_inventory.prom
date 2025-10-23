@@ -1,0 +1,158 @@
+#!/usr/bin/env bash
+
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
+# Copyright 2025 Edgecast Cloud LLC.
+
+set -o errexit
+set -o pipefail
+
+# shellcheck disable=SC2154
+if [[ -n "$TRACE" ]]; then
+    export PS4='[\D{%FT%TZ}] ${BASH_SOURCE}:${LINENO}: ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
+    set -o xtrace
+fi
+
+# Get list of zones with all needed fields in parseable format
+zone_list=$(vmadm list -p -o uuid,alias,brand,state,ram,vcpus,cpu_cap,quota,flexible_disk_size,max_swap,max_lwps,billing_id,owner_uuid 2>/dev/null || true)
+
+# shellcheck disable=SC2181
+if [ -z "$zone_list" ]; then
+    # If vmadm fails or no zones, exit silently
+    exit 0
+fi
+
+# Track zone info and allocation metrics
+zone_info_lines=""
+zone_state_lines=""
+zone_memory_lines=""
+zone_vcpus_lines=""
+zone_cpu_cap_lines=""
+zone_quota_lines=""
+zone_flexible_disk_lines=""
+zone_swap_lines=""
+zone_lwps_lines=""
+
+# Process each zone (vmadm list -p outputs colon-separated fields)
+while IFS=: read -r uuid alias brand state ram vcpus cpu_cap quota flexible_disk max_swap max_lwps billing_id owner_uuid; do
+    # Handle empty/null values
+    [ -z "$alias" ] && alias=""
+    [ -z "$billing_id" ] && billing_id=""
+    [ -z "$owner_uuid" ] && owner_uuid=""
+    [ -z "$ram" ] && ram="0"
+    [ -z "$vcpus" ] && vcpus="0"
+    [ -z "$cpu_cap" ] && cpu_cap="0"
+    [ -z "$quota" ] && quota="0"
+    [ -z "$flexible_disk" ] && flexible_disk="0"
+    [ -z "$max_swap" ] && max_swap="0"
+    [ -z "$max_lwps" ] && max_lwps="0"
+
+
+    # Build per-zone allocation metrics
+    # RAM is in MiB, convert to bytes
+    if [ "$ram" != "0" ]; then
+        ram_bytes=$((ram * 1048576))
+        zone_memory_lines="${zone_memory_lines}cn_zone_allocated_memory_bytes{uuid=\"${uuid}\"}\t${ram_bytes}\n"
+    fi
+
+    # VCPUs
+    if [ "$vcpus" != "0" ]; then
+        zone_vcpus_lines="${zone_vcpus_lines}cn_zone_allocated_vcpus{uuid=\"${uuid}\"}\t${vcpus}\n"
+    fi
+
+    # CPU Cap
+    if [ "$cpu_cap" != "0" ]; then
+        zone_cpu_cap_lines="${zone_cpu_cap_lines}cn_zone_allocated_cpu_cap{uuid=\"${uuid}\"}\t${cpu_cap}\n"
+    fi
+
+    # Quota is in GiB, convert to bytes
+    if [ "$quota" != "0" ]; then
+        quota_bytes=$((quota * 1073741824))
+        zone_quota_lines="${zone_quota_lines}cn_zone_allocated_quota_bytes{uuid=\"${uuid}\"}\t${quota_bytes}\n"
+    fi
+
+    # Flexible disk size is in MiB, convert to bytes
+    if [ "$flexible_disk" != "0" ]; then
+        flexible_disk_bytes=$((flexible_disk * 1048576))
+        zone_flexible_disk_lines="${zone_flexible_disk_lines}cn_zone_allocated_flexible_disk_bytes{uuid=\"${uuid}\"}\t${flexible_disk_bytes}\n"
+    fi
+
+    # Max swap is in MiB, convert to bytes
+    if [ "$max_swap" != "0" ]; then
+        max_swap_bytes=$((max_swap * 1048576))
+        zone_swap_lines="${zone_swap_lines}cn_zone_allocated_swap_bytes{uuid=\"${uuid}\"}\t${max_swap_bytes}\n"
+    fi
+
+    # Max lwps
+    if [ "$max_lwps" != "0" ]; then
+        zone_lwps_lines="${zone_lwps_lines}cn_zone_allocated_max_lwps{uuid=\"${uuid}\"}\t${max_lwps}\n"
+    fi
+
+    # Build zone info line
+    zone_info_lines="${zone_info_lines}cn_zone_info{uuid=\"${uuid}\",alias=\"${alias}\",brand=\"${brand}\",billing_id=\"${billing_id}\",owner_uuid=\"${owner_uuid}\"}\t1\n"
+
+    # Map state to numeric code (healthy states = lower numbers, unhealthy = higher)
+    case "$state" in
+        "running")         state_code=0 ;;
+        "stopped")         state_code=1 ;;
+        "ready")           state_code=2 ;;
+        "installed")       state_code=3 ;;
+        "configured")      state_code=4 ;;
+        "provisioning")    state_code=5 ;;
+        "receiving")       state_code=6 ;;
+        "stopping")        state_code=7 ;;
+        "shutting_down")   state_code=8 ;;
+        "incomplete")      state_code=9 ;;
+        "down")            state_code=10 ;;
+        "failed")          state_code=11 ;;
+        *)                 state_code=99 ;;  # Unknown state
+    esac
+
+    # Build per-zone state line (single metric with numeric value)
+    zone_state_lines="${zone_state_lines}cn_zone_state{uuid=\"${uuid}\"}\t${state_code}\n"
+done <<< "$zone_list"
+
+
+# Set TTL to 300 seconds (5 minutes) since vmadm operations are expensive
+printf '# OPTION ttl 300\n'
+
+# Output per-zone allocation metrics
+printf '# HELP cn_zone_allocated_memory_bytes Memory allocated to zone in bytes\n'
+printf '# TYPE cn_zone_allocated_memory_bytes gauge\n'
+printf '%b' "$zone_memory_lines"
+
+printf '# HELP cn_zone_allocated_vcpus vCPUs allocated to zone\n'
+printf '# TYPE cn_zone_allocated_vcpus gauge\n'
+printf '%b' "$zone_vcpus_lines"
+
+printf '# HELP cn_zone_allocated_cpu_cap cpu_cap allocated to zone\n'
+printf '# TYPE cn_zone_allocated_cpu_cap gauge\n'
+printf '%b' "$zone_cpu_cap_lines"
+
+printf '# HELP cn_zone_allocated_quota_bytes Disk quota allocated to zone in bytes\n'
+printf '# TYPE cn_zone_allocated_quota_bytes gauge\n'
+printf '%b' "$zone_quota_lines"
+
+printf '# HELP cn_zone_allocated_flexible_disk_bytes Flexible disk size allocated to zone in bytes\n'
+printf '# TYPE cn_zone_allocated_flexible_disk_bytes gauge\n'
+printf '%b' "$zone_flexible_disk_lines"
+
+printf '# HELP cn_zone_allocated_swap_bytes Swap allocated to zone in bytes\n'
+printf '# TYPE cn_zone_allocated_swap_bytes gauge\n'
+printf '%b' "$zone_swap_lines"
+
+printf '# HELP cn_zone_allocated_max_lwps Max lightweight processes allocated to zone\n'
+printf '# TYPE cn_zone_allocated_max_lwps gauge\n'
+printf '%b' "$zone_lwps_lines"
+
+# Output zone info metrics
+printf '# HELP cn_zone_info Zone information with labels\n'
+printf '# TYPE cn_zone_info gauge\n'
+printf '%b' "$zone_info_lines"
+
+# Output per-zone state metrics
+printf '# HELP cn_zone_state Zone state (0=running, 1=stopped, 2=ready, 3=installed, 4=configured, 5=provisioning, 6=receiving, 7=stopping, 8=shutting_down, 9=incomplete, 10=down, 11=failed, 99=unknown)\n'
+printf '# TYPE cn_zone_state gauge\n'
+printf '%b' "$zone_state_lines"

@@ -7,21 +7,177 @@
 # Copyright 2020 Joyent, Inc.
 # Copyright 2025 Edgecast Cloud LLC.
 
-case $1 in
+case "$1" in
     list)
-        # zone_count.prom
-cat << EOF
-configured        configured
-failed            installed
-incomplete        incomplete
-running           running
-shutting_down     shutting_down
-stopped           installed
-EOF
-    ;;
+        if [[ "$2" == "-H" ]]; then
+            # Output parseable list of zone UUIDs
+            cat <<INNEREOF
+f62b0465-d232-4a17-b312-25319236995c
+INNEREOF
+        elif [[ "$2" == "-p" ]]; then
+            cat <<INNEREOF
+1f4204e6-03a4-4096-9db8-f84f1b5b4b8d:dev-webserver:bhyve:running:4096:1:100:1:38912:8192:4000:75fe7c5c-c2b4-4fc9-b5f5-c4f69b37d32f:01f842b9-6415-4b92-89e5-f35bdd52150c
+a83d6dcb-ee7f-41bd-9ee9-0b9577f9b999:em7h1fewref3w-lb-f7xm3yg3shde-nvka:joyent:stopped:4096::400:50::8192:8192:5e74772d-8663-491f-90dd-1bf7b1939f45:1bfca979-16d4-49d7-90db-cb70fc1da870
+aa69a499-dd8e-4459-8bfc-4899c94bab14:piranha-portal-aa69a499:joyent:ready:4096::100:38::8192:4000:75fe7c5c-c2b4-4fc9-b5f5-c4f69b37d32f:56231556-2e6d-4d9a-9ca8-83536a6223e5
+41e6a368-fa01-40a6-a44f-f450c532c203:41e6a368:joyent:installed:8192::200:75::16384:4000:27c55576-8004-11ee-84a3-40a6b72259f8:7a53ef65-3ed6-400b-a66a-e200df261ec9
+7a02ed46-24d5-4669-abba-c0748b42fc64:rancher001:bhyve:configured:16384:4:400:1:153600:32568:4000:a8812006-290d-4ae5-892e-d8b5f200ccee:4e5b4003-a70c-4775-8083-863a6b298285
+83025959-de12-47ae-997c-55e22fdfb444:1a-telemetry-k0s-prd-04:bhyve:provisioning:32768:8:800:1:1126400:65536:8192:fc6b0e77-c8ca-4b57-b0db-7ca7da0774ab:e5f78872-a966-41f9-b042-7ec8e4a2f4c5
+856b2712-6938-4fa1-91a1-a2a169da8fd2:testnet-sentry-2:bhyve:receiving:32768:8:800:1:307200:131072:4000:553db434-f9a5-b2ef-ee26-507e00434f1d:a098651e-6025-4c28-89bb-6cd399055ce3
+b32f777c-acf0-46bb-933e-e25807f039c3:1a-k8s-dev-6:bhyve:stopping:32768:8:800:1:307200:131072:4000:c12804a4-7acc-4cf2-841c-0ec55a8ae7c7:3a666c03-1be7-49a7-95fb-a0342de88504
+0b319f42-dbbd-441d-a142-6e0217088875:q7hzmxp4rvsme-psdb4-da11-stage-pool-1:bhyve:shutting_down:65280:16:1600:1:614400:130560:4000:d65e3afd-c024-42a5-97d9-a50ad2f300c0:be8063ec-8367-480a-89dc-30149f85aafb
+8c0b84f5-a9e8-4428-8c0c-c02f2cf2ed3b:gptxfsfgphz58-0wb2w-da11-prod-pool-1:bhyve:incomplete:65280:16:1600:1:614400:130560:4000:d65e3afd-c024-42a5-97d9-a50ad2f300c0:be8063ec-8367-480a-89dc-30149f85aafb
+9bb5e00f-e19a-40b5-9076-62151ff363dd:q7hzmxp4rvsme-n4mry-da11-stage-pool-1:bhyve:down:65280:16:1600:1:614400:130560:4000:d65e3afd-c024-42a5-97d9-a50ad2f300c0:be8063ec-8367-480a-89dc-30149f85aafb
+INNEREOF
+
+        fi
+        ;;
     get)
-        # smf.prom
-        printf '{"brand":"joyent"}' ;;
-    *)
-        exit 0;;
+        uuid="$2"
+        if [[ "$uuid" == "f62b0465-d232-4a17-b312-25319236995c" ]]; then
+            cat <<'INNEREOF'
+{
+  "uuid": "f62b0465-d232-4a17-b312-25319236995c",
+  "brand": "bhyve",
+  "state": "running",
+  "alias": "primarycache_test",
+  "ram": 65280,
+  "vcpus": 16,
+  "quota": 1,
+  "flexible_disk_size": 614400,
+  "max_swap": 130560,
+  "max_lwps": 4000,
+  "billing_id": "d65e3afd-c024-42a5-97d9-a50ad2f300c0",
+  "owner_uuid": "7a53ef65-3ed6-400b-a66a-e200df261ec9"
+}
+INNEREOF
+        elif [[ "$uuid" == "a83d6dcb-ee7f-41bd-9ee9-0b9577f9b999" ]]; then
+            cat <<'INNEREOF'
+{
+  "zonename": "a83d6dcb-ee7f-41bd-9ee9-0b9577f9b999",
+  "autoboot": true,
+  "brand": "joyent",
+  "limit_priv": "default",
+  "v": 1,
+  "create_timestamp": "2025-07-02T15:40:28.024Z",
+  "image_uuid": "9d7b2651-4525-42d7-8147-4d6f8f2dd7dd",
+  "cpu_shares": 32,
+  "max_lwps": 8192,
+  "max_msg_ids": 4096,
+  "max_sem_ids": 4096,
+  "max_shm_ids": 4096,
+  "max_shm_memory": 4096,
+  "zfs_io_priority": 100,
+  "max_physical_memory": 4096,
+  "max_locked_memory": 4096,
+  "max_swap": 8192,
+  "cpu_cap": 400,
+  "billing_id": "5e74772d-8663-491f-90dd-1bf7b1939f45",
+  "owner_uuid": "1bfca979-16d4-49d7-90db-cb70fc1da870",
+  "tmpfs": 4096,
+  "hostname": "em7h1fewref3w-lb-f7xm3yg3shde-nvka",
+  "dns_domain": "inst.pulse.us-central-1a.cns.parlercloud.zone",
+  "archive_on_delete": true,
+  "resolvers": [
+    "10.11.36.2",
+    "10.11.36.3",
+    "142.147.4.53",
+    "1.1.1.1",
+    "4.2.2.4",
+    "8.8.8.8"
+  ],
+  "alias": "em7h1fewref3w-lb-f7xm3yg3shde-nvka",
+  "nics": [
+    {
+      "interface": "net0",
+      "mac": "90:b8:d0:19:ea:1b",
+      "vlan_id": 121,
+      "nic_tag": "internal",
+      "gateway": "10.11.36.1",
+      "gateways": [
+        "10.11.36.1"
+      ],
+      "netmask": "255.255.252.0",
+      "ip": "10.11.36.48",
+      "ips": [
+        "10.11.36.48/22"
+      ],
+      "network_uuid": "dd1f527d-e09e-489b-bcb4-d5b85bf03fcf",
+      "mtu": 1500
+    },
+    {
+      "interface": "net1",
+      "mac": "90:b8:d0:a6:36:95",
+      "vlan_id": 1474,
+      "nic_tag": "external",
+      "gateway": "142.147.4.1",
+      "gateways": [
+        "142.147.4.1"
+      ],
+      "netmask": "255.255.255.0",
+      "ip": "142.147.4.129",
+      "ips": [
+        "142.147.4.129/24"
+      ],
+      "network_uuid": "13ab1828-2ba1-47cd-bfa7-59cdf2a2cb29",
+      "mtu": 1500,
+      "primary": true
+    },
+    {
+      "interface": "net2",
+      "mac": "90:b8:d0:8e:29:98",
+      "vlan_id": 116,
+      "nic_tag": "internal",
+      "gateway": "10.11.16.1",
+      "gateways": [
+        "10.11.16.1"
+      ],
+      "netmask": "255.255.252.0",
+      "ip": "10.11.17.152",
+      "ips": [
+        "10.11.17.152/22"
+      ],
+      "network_uuid": "298b1f90-bb10-4f99-8e29-91f5ee5aa69c",
+      "mtu": 1500
+    }
+  ],
+  "uuid": "a83d6dcb-ee7f-41bd-9ee9-0b9577f9b999",
+  "zone_state": "running",
+  "zonepath": "/zones/a83d6dcb-ee7f-41bd-9ee9-0b9577f9b999",
+  "hvm": false,
+  "zoneid": 36,
+  "zonedid": 45,
+  "last_modified": "2025-09-25T08:29:40.000Z",
+  "firewall_enabled": false,
+  "server_uuid": "804705ac-b7f8-4f8a-9389-4c38d51e0f27",
+  "datacenter_name": "us-central-1a",
+  "platform_buildstamp": "20241212T000748Z",
+  "state": "running",
+  "boot_timestamp": "2025-07-02T15:41:07.000Z",
+  "init_restarts": 0,
+  "pid": 577903,
+  "customer_metadata": {
+    "cloud.tritoncompute:loadbalancer": "true",
+    "cloud.tritoncompute:portmap": "tcp://15080:1a-pulse-internal.3shvv1ebbccb.svc.1bfca979-16d4-49d7-90db-cb70fc1da870.us-central-1a.cns.parlercloud.zone:31616{rise:30,fall:1},tcp://15443:1a-pulse-internal.3shvv1ebbccb.svc.1bfca979-16d4-49d7-90db-cb70fc1da870.us-central-1a.cns.parlercloud.zone:32584{rise:30,fall:1},tcp://443:1a-pulse-internal.3shvv1ebbccb.svc.1bfca979-16d4-49d7-90db-cb70fc1da870.us-central-1a.cns.parlercloud.zone:31831{rise:30,fall:1},tcp://80:1a-pulse-internal.3shvv1ebbccb.svc.1bfca979-16d4-49d7-90db-cb70fc1da870.us-central-1a.cns.parlercloud.zone:31958{rise:30,fall:1}",
+    "root_authorized_keys": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFdlSlHr7T0O5frED1sIVGL+gFRJCifE2E4DO7acqyzg\nssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDIwaPkUioCUa1jRU0Ex6KeNmwsu4WRrWJRaKB+k/+a4tqrzziSgpjfoJ1vjfV6pB3V2ZCiPC30zWMNYRiKjAMv2nETJC80CvnhTR35QSlN1VMYjLG2DQTeMw39q8UncM8DVQ1aM0wByizNFD5U/rTCm13sxrwRr5N8326KRvuvwWTOS9O1vr/MvGUvU5YxWFl3bzpvKg8eMRAyNW1rkd6pcYUzS+/L+9+YyKpfmlEycix978TZQB/FZSJdzhRW83NJCAK1MU4o5TvAGZKWBlWWunsfzUl10Dak4zsVslvSBdX4ENDrDTMrHfohtzaxL+Eshr/1UQh91s7zZfje08K3qBDSm3Irbbi2feGfVrX3ihwKYPjIZcPBpDQv2vmDmQRN4aqc5yLXoe+iVTtdauYWgebzPFS2She46h+/8xxGLauQqdosuvpWfOBIISUmsO5I9wKsul1AOCS6TWbNKfTmlKwq/sHje6Fw/ZJ1SUAH3QwwjyWb/j2c530mXlQBtvVUyw14niZIHZdf+qFGeKIHdAmceLuk1PuNvQxj220owi18eOa8TysrhVGOgOgT5lgMxHC7saTah8WLLAlLHUqkRjpqG6W/alP9e/VNrpx+vdUBQUxVu5pM1TKXBUKYiEhwmnT0hZB9YExmTeOiZLnxlbG9JdbMpPLWtQIQ0LocMw==\n",
+    "cloud.tritoncompute:syslog": ""
+  },
+  "internal_metadata": {},
+  "routes": {},
+  "tags": {
+    "triton.cns.services": "lb-f7xm3yg3shde",
+    "cpln-lb-target": "istio-ingressgateway-us-central-1a/istio-system/cd2ec13d-ca53-4388-bad8-85d067b2b4b8",
+    "cpln-owner": "em7h1fewref3w/lb",
+    "cpln-cluster-name": "da11-k8s-dev-1",
+    "cpln-cluster-org": "pulse-dev"
+  },
+  "quota": 50,
+  "zfs_root_compression": "lz4",
+  "zfs_root_recsize": 131072,
+  "zfs_filesystem": "zones/a83d6dcb-ee7f-41bd-9ee9-0b9577f9b999",
+  "zpool": "zones",
+  "snapshots": []
+}
+INNEREOF
+        fi
+        ;;
 esac

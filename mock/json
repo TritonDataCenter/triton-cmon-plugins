@@ -1,0 +1,17 @@
+#!/bin/bash
+
+# Check if this is the uptime calculation command
+if [[ "$1" == "-ae" ]]; then
+    # Return hardcoded uptime value instead of calculating
+    cat <<EOF
+19010734
+EOF
+elif [[ -n "$1" ]]; then
+    # Use actual json command for other cases (like extracting brand)
+    /usr/local/bin/json "$@"
+else
+    # Default output
+    cat <<EOF
+19010734
+EOF
+fi

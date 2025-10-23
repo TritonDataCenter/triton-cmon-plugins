@@ -1,0 +1,19 @@
+# OPTION ttl 0
+# HELP cn_load_average_1min System load average over 1 minute
+# TYPE cn_load_average_1min gauge
+cn_load_average_1min	7.98
+# HELP cn_load_average_5min System load average over 5 minutes
+# TYPE cn_load_average_5min gauge
+cn_load_average_5min	7.70
+# HELP cn_load_average_15min System load average over 15 minutes
+# TYPE cn_load_average_15min gauge
+cn_load_average_15min	7.65
+# HELP cn_processes Total number of processes
+# TYPE cn_processes gauge
+cn_processes	167
+# HELP cn_cpu_context_switches_total Total number of context switches across all CPUs
+# TYPE cn_cpu_context_switches_total counter
+cn_cpu_context_switches_total	37166243419
+# HELP cn_cpu_interrupts_total Total number of interrupts across all CPUs
+# TYPE cn_cpu_interrupts_total counter
+cn_cpu_interrupts_total	117114117824

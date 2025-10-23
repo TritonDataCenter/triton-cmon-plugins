@@ -3,11 +3,409 @@
 if [[ "$1" == -j ]]; then
     shift
     case "$@" in
-        unix:*:boot_time)
-            printf '[{"module":"unix","instance":0,"name":"system_misc","class":"misc","type":1,"snaptime":4308486.54831974,"data":{"boot_time":1595104221}}]'
+        unix:::boot_time)
+          cat <<EOF
+[{ "module": "unix", "instance": 0, "name": "system_misc", "class": "misc", "type": 1, "snaptime": 19012070.274223123, "data": { "boot_time": 1741717927 } }]
+EOF
             ;;
         *)
             printf '{}'
+            ;;
+    esac
+elif [[ "$1" == -p ]]; then
+    shift
+    # Handle -p (parseable) output for various kstat queries
+    case "$@" in
+        # Memory stats
+        unix:0:system_pages:physmem\ unix:0:system_pages:freemem\ unix:0:system_pages:availrmem)
+            cat <<EOF
+unix:0:system_pages:physmem	100313289
+unix:0:system_pages:freemem	41088663
+unix:0:system_pages:availrmem	41306442
+EOF
+            ;;
+        'cpu:::pgpgin')
+            # Simulate per-CPU pgpgin stats
+            for i in {0..3}; do
+                echo "cpu:${i}:vm:pgpgin	$((5000 + i * 100))"
+            done
+            ;;
+        'cpu:::pgpgout')
+            # Simulate per-CPU pgpgout stats
+            for i in {0..3}; do
+                echo "cpu:${i}:vm:pgpgout	$((1000 + i * 50))"
+            done
+            ;;
+        'cpu:::pgscan')
+            # Simulate per-CPU pgscan stats
+            for i in {0..3}; do
+                echo "cpu:${i}:vm:pgscan	0"
+            done
+            ;;
+        # Network stats for igb0
+        link::igb0:*)
+            cat <<EOF
+link:0:igb0:rbytes64	9945603321958
+link:0:igb0:obytes64	6172629005
+link:0:igb0:ipackets64	28940220713
+link:0:igb0:opackets64	16294949
+link:0:igb0:ierrors	5
+link:0:igb0:oerrors	0
+link:0:igb0:norcvbuf	32
+link:0:igb0:noxmtbuf	0
+link:0:igb0:ifspeed	1000000000
+link:0:igb0:link_state	1
+EOF
+            ;;
+        # Network stats for cxgbe0
+        link::cxgbe0:*)
+            cat <<EOF
+link:0:cxgbe0:rbytes64	0
+link:0:cxgbe0:obytes64	54970235
+link:0:cxgbe0:ipackets64	0
+link:0:cxgbe0:opackets64	591078
+link:0:cxgbe0:ierrors	0
+link:0:cxgbe0:oerrors	0
+link:0:cxgbe0:norcvbuf	0
+link:0:cxgbe0:noxmtbuf	0
+link:0:cxgbe0:ifspeed	0
+link:0:cxgbe0:link_state	0
+EOF
+            ;;
+        # Disk I/O stats for blkdev
+        blkdev:::nread\ blkdev:::nwritten\ blkdev:::reads\ blkdev:::writes\ blkdev:::rtime\ blkdev:::wtime)
+            cat <<EOF
+blkdev:0:blkdev0:nread	389529783296
+blkdev:1:blkdev1:nread	437561932800
+blkdev:2:blkdev2:nread	437876137472
+blkdev:3:blkdev3:nread	389272784384
+blkdev:0:blkdev0:nwritten	14776664804352
+blkdev:1:blkdev1:nwritten	14956815625216
+blkdev:2:blkdev2:nwritten	14956738658816
+blkdev:3:blkdev3:nwritten	14777321883648
+blkdev:0:blkdev0:reads	277341335
+blkdev:1:blkdev1:reads	330082970
+blkdev:2:blkdev2:reads	329973843
+blkdev:3:blkdev3:reads	276757149
+blkdev:0:blkdev0:writes	1502017154
+blkdev:1:blkdev1:writes	1601856559
+blkdev:2:blkdev2:writes	1600811614
+blkdev:3:blkdev3:writes	1501687120
+blkdev:0:blkdev0:rtime	57632862491066
+blkdev:1:blkdev1:rtime	60898750845620
+blkdev:2:blkdev2:rtime	60922987082089
+blkdev:3:blkdev3:rtime	57679800863083
+blkdev:0:blkdev0:wtime	562675015111
+blkdev:1:blkdev1:wtime	579166640342
+blkdev:2:blkdev2:wtime	604246817372
+blkdev:3:blkdev3:wtime	558229047747
+EOF
+            ;;
+        # CPU detailed stats
+        cpu::sys:cpu_nsec_user\ cpu::sys:cpu_nsec_kernel\ cpu::sys:cpu_nsec_idle\ cpu::sys:cpu_nsec_intr\ cpu_info:::brand\ cpu_info:::chip_id\ cpu_info:::clock_MHz)
+            cat <<EOF
+cpu:0:sys:cpu_nsec_user	11547759579557
+cpu:1:sys:cpu_nsec_user	17163784494731
+cpu:2:sys:cpu_nsec_user	12312379081928
+cpu:3:sys:cpu_nsec_user	18416556187864
+cpu:4:sys:cpu_nsec_user	13220727969366
+cpu:5:sys:cpu_nsec_user	18996918838173
+cpu:6:sys:cpu_nsec_user	13642280654206
+cpu:7:sys:cpu_nsec_user	19276487379337
+cpu:8:sys:cpu_nsec_user	13731350829474
+cpu:9:sys:cpu_nsec_user	19347322622648
+cpu:10:sys:cpu_nsec_user	13771156442391
+cpu:11:sys:cpu_nsec_user	19222432305054
+cpu:12:sys:cpu_nsec_user	13681309972567
+cpu:13:sys:cpu_nsec_user	19269447901941
+cpu:14:sys:cpu_nsec_user	13756784089468
+cpu:15:sys:cpu_nsec_user	19214524494321
+cpu:16:sys:cpu_nsec_user	13790589880417
+cpu:17:sys:cpu_nsec_user	19225023697984
+cpu:18:sys:cpu_nsec_user	14071677476620
+cpu:19:sys:cpu_nsec_user	19640865425394
+cpu:20:sys:cpu_nsec_user	21170410865054
+cpu:21:sys:cpu_nsec_user	15711535671678
+cpu:22:sys:cpu_nsec_user	20383330007934
+cpu:23:sys:cpu_nsec_user	14660540808877
+cpu:24:sys:cpu_nsec_user	19691386557759
+cpu:25:sys:cpu_nsec_user	14148673976514
+cpu:26:sys:cpu_nsec_user	19672518409893
+cpu:27:sys:cpu_nsec_user	14013201434763
+cpu:28:sys:cpu_nsec_user	19590949254452
+cpu:29:sys:cpu_nsec_user	14028064842448
+cpu:30:sys:cpu_nsec_user	19595309059957
+cpu:31:sys:cpu_nsec_user	13961566055751
+cpu:32:sys:cpu_nsec_user	19594447279448
+cpu:33:sys:cpu_nsec_user	13983782914059
+cpu:34:sys:cpu_nsec_user	19507740842976
+cpu:35:sys:cpu_nsec_user	13907970104050
+cpu:36:sys:cpu_nsec_user	19487884117651
+cpu:37:sys:cpu_nsec_user	13846674935029
+cpu:38:sys:cpu_nsec_user	19145368729173
+cpu:39:sys:cpu_nsec_user	13433912246856
+cpu:0:sys:cpu_nsec_kernel	1597011250650422
+cpu:1:sys:cpu_nsec_kernel	2030164417314048
+cpu:2:sys:cpu_nsec_kernel	976378598876972
+cpu:3:sys:cpu_nsec_kernel	2036774997375067
+cpu:4:sys:cpu_nsec_kernel	947521645392862
+cpu:5:sys:cpu_nsec_kernel	2015142068419747
+cpu:6:sys:cpu_nsec_kernel	945941985095100
+cpu:7:sys:cpu_nsec_kernel	2035061035724464
+cpu:8:sys:cpu_nsec_kernel	938542797816618
+cpu:9:sys:cpu_nsec_kernel	2007570772528383
+cpu:10:sys:cpu_nsec_kernel	937812228074509
+cpu:11:sys:cpu_nsec_kernel	2004622080615850
+cpu:12:sys:cpu_nsec_kernel	948823657958719
+cpu:13:sys:cpu_nsec_kernel	2022485080504606
+cpu:14:sys:cpu_nsec_kernel	929462678690200
+cpu:15:sys:cpu_nsec_kernel	2016500579950807
+cpu:16:sys:cpu_nsec_kernel	936253633575814
+cpu:17:sys:cpu_nsec_kernel	2023128673676370
+cpu:18:sys:cpu_nsec_kernel	1250157806201652
+cpu:19:sys:cpu_nsec_kernel	2156169683550223
+cpu:20:sys:cpu_nsec_kernel	2104925133171205
+cpu:21:sys:cpu_nsec_kernel	982387654733206
+cpu:22:sys:cpu_nsec_kernel	1993519860847814
+cpu:23:sys:cpu_nsec_kernel	946440290506816
+cpu:24:sys:cpu_nsec_kernel	1996517797193580
+cpu:25:sys:cpu_nsec_kernel	932988349971503
+cpu:26:sys:cpu_nsec_kernel	2008060600604877
+cpu:27:sys:cpu_nsec_kernel	938152688495679
+cpu:28:sys:cpu_nsec_kernel	2030952659973624
+cpu:29:sys:cpu_nsec_kernel	941105406715289
+cpu:30:sys:cpu_nsec_kernel	2009127550877805
+cpu:31:sys:cpu_nsec_kernel	951742534235432
+cpu:32:sys:cpu_nsec_kernel	2003410058224568
+cpu:33:sys:cpu_nsec_kernel	934455117896275
+cpu:34:sys:cpu_nsec_kernel	2014384606697303
+cpu:35:sys:cpu_nsec_kernel	931258248789491
+cpu:36:sys:cpu_nsec_kernel	2030666296414716
+cpu:37:sys:cpu_nsec_kernel	939051076779965
+cpu:38:sys:cpu_nsec_kernel	1957347685151890
+cpu:39:sys:cpu_nsec_kernel	908515110498917
+cpu:0:sys:cpu_nsec_idle	17400536221242913
+cpu:1:sys:cpu_nsec_idle	16961766451801544
+cpu:2:sys:cpu_nsec_idle	18020403642951260
+cpu:3:sys:cpu_nsec_idle	16953903034138083
+cpu:4:sys:cpu_nsec_idle	18048352166145650
+cpu:5:sys:cpu_nsec_idle	16974955508677665
+cpu:6:sys:cpu_nsec_idle	18049510198012583
+cpu:7:sys:cpu_nsec_idle	16954756909140779
+cpu:8:sys:cpu_nsec_idle	18056820246360677
+cpu:9:sys:cpu_nsec_idle	16982176267453467
+cpu:10:sys:cpu_nsec_idle	18057510945417005
+cpu:11:sys:cpu_nsec_idle	16985249783702523
+cpu:12:sys:cpu_nsec_idle	18046589296296934
+cpu:13:sys:cpu_nsec_idle	16967339693554879
+cpu:14:sys:cpu_nsec_idle	18065874726742850
+cpu:15:sys:cpu_nsec_idle	16973379052377608
+cpu:16:sys:cpu_nsec_idle	18059049900183532
+cpu:17:sys:cpu_nsec_idle	16966740392947369
+cpu:18:sys:cpu_nsec_idle	17744864574156967
+cpu:19:sys:cpu_nsec_idle	16833283476511086
+cpu:20:sys:cpu_nsec_idle	16882998447458617
+cpu:21:sys:cpu_nsec_idle	18010994774234728
+cpu:22:sys:cpu_nsec_idle	16995190746880706
+cpu:23:sys:cpu_nsec_idle	18047993079608071
+cpu:24:sys:cpu_nsec_idle	16992884700466841
+cpu:25:sys:cpu_nsec_idle	18061956833264332
+cpu:26:sys:cpu_nsec_idle	16981360711232114
+cpu:27:sys:cpu_nsec_idle	18056927913572730
+cpu:28:sys:cpu_nsec_idle	16958550167538937
+cpu:29:sys:cpu_nsec_idle	18053960278360453
+cpu:30:sys:cpu_nsec_idle	16980370862997988
+cpu:31:sys:cpu_nsec_idle	18043389595590402
+cpu:32:sys:cpu_nsec_idle	16986089163610208
+cpu:33:sys:cpu_nsec_idle	18060654741344211
+cpu:34:sys:cpu_nsec_idle	16975201267711535
+cpu:35:sys:cpu_nsec_idle	18063927369133031
+cpu:36:sys:cpu_nsec_idle	16958939380559117
+cpu:37:sys:cpu_nsec_idle	18056195782619319
+cpu:38:sys:cpu_nsec_idle	17032600453668125
+cpu:39:sys:cpu_nsec_idle	18087144457906893
+cpu:0:sys:cpu_nsec_intr	333923158553081
+cpu:1:sys:cpu_nsec_intr	34579810215254
+cpu:2:sys:cpu_nsec_intr	18669728371772
+cpu:3:sys:cpu_nsec_intr	34368572478375
+cpu:4:sys:cpu_nsec_intr	18070060799642
+cpu:5:sys:cpu_nsec_intr	33908921318104
+cpu:6:sys:cpu_nsec_intr	17934166154894
+cpu:7:sys:cpu_nsec_intr	33865288159392
+cpu:8:sys:cpu_nsec_intr	17882704156486
+cpu:9:sys:cpu_nsec_intr	33915954444180
+cpu:10:sys:cpu_nsec_intr	16568799894821
+cpu:11:sys:cpu_nsec_intr	32554202811100
+cpu:12:sys:cpu_nsec_intr	20277586657842
+cpu:13:sys:cpu_nsec_intr	32780060198002
+cpu:14:sys:cpu_nsec_intr	16655048876164
+cpu:15:sys:cpu_nsec_intr	32605975107544
+cpu:16:sys:cpu_nsec_intr	16436271556026
+cpu:17:sys:cpu_nsec_intr	32603460693132
+cpu:18:sys:cpu_nsec_intr	204620419975917
+cpu:19:sys:cpu_nsec_intr	139793726442899
+cpu:20:sys:cpu_nsec_intr	142351761390661
+cpu:21:sys:cpu_nsec_intr	18746505641337
+cpu:22:sys:cpu_nsec_intr	33719132962693
+cpu:23:sys:cpu_nsec_intr	17788294718591
+cpu:24:sys:cpu_nsec_intr	33969896399276
+cpu:25:sys:cpu_nsec_intr	18042441029407
+cpu:26:sys:cpu_nsec_intr	33797648893783
+cpu:27:sys:cpu_nsec_intr	17565270123616
+cpu:28:sys:cpu_nsec_intr	33868566928431
+cpu:29:sys:cpu_nsec_intr	17598994324647
+cpu:30:sys:cpu_nsec_intr	33731007155978
+cpu:31:sys:cpu_nsec_intr	17603480829748
+cpu:32:sys:cpu_nsec_intr	33350518635175
+cpu:33:sys:cpu_nsec_intr	17648921178235
+cpu:34:sys:cpu_nsec_intr	33526411175020
+cpu:35:sys:cpu_nsec_intr	17552267937561
+cpu:36:sys:cpu_nsec_intr	33674286693554
+cpu:37:sys:cpu_nsec_intr	17549807243261
+cpu:38:sys:cpu_nsec_intr	32668061452379
+cpu:39:sys:cpu_nsec_intr	17058910559759
+cpu_info:0:cpu_info0:brand	Intel(r) Xeon(r) Gold 6230 CPU @ 2.10GHz
+cpu_info:1:cpu_info1:brand	Intel(r) Xeon(r) Gold 6230 CPU @ 2.10GHz
+cpu_info:2:cpu_info2:brand	Intel(r) Xeon(r) Gold 6230 CPU @ 2.10GHz
+cpu_info:3:cpu_info3:brand	Intel(r) Xeon(r) Gold 6230 CPU @ 2.10GHz
+cpu_info:4:cpu_info4:brand	Intel(r) Xeon(r) Gold 6230 CPU @ 2.10GHz
+cpu_info:5:cpu_info5:brand	Intel(r) Xeon(r) Gold 6230 CPU @ 2.10GHz
+cpu_info:6:cpu_info6:brand	Intel(r) Xeon(r) Gold 6230 CPU @ 2.10GHz
+cpu_info:7:cpu_info7:brand	Intel(r) Xeon(r) Gold 6230 CPU @ 2.10GHz
+cpu_info:8:cpu_info8:brand	Intel(r) Xeon(r) Gold 6230 CPU @ 2.10GHz
+cpu_info:9:cpu_info9:brand	Intel(r) Xeon(r) Gold 6230 CPU @ 2.10GHz
+cpu_info:10:cpu_info10:brand	Intel(r) Xeon(r) Gold 6230 CPU @ 2.10GHz
+cpu_info:11:cpu_info11:brand	Intel(r) Xeon(r) Gold 6230 CPU @ 2.10GHz
+cpu_info:12:cpu_info12:brand	Intel(r) Xeon(r) Gold 6230 CPU @ 2.10GHz
+cpu_info:13:cpu_info13:brand	Intel(r) Xeon(r) Gold 6230 CPU @ 2.10GHz
+cpu_info:14:cpu_info14:brand	Intel(r) Xeon(r) Gold 6230 CPU @ 2.10GHz
+cpu_info:15:cpu_info15:brand	Intel(r) Xeon(r) Gold 6230 CPU @ 2.10GHz
+cpu_info:16:cpu_info16:brand	Intel(r) Xeon(r) Gold 6230 CPU @ 2.10GHz
+cpu_info:17:cpu_info17:brand	Intel(r) Xeon(r) Gold 6230 CPU @ 2.10GHz
+cpu_info:18:cpu_info18:brand	Intel(r) Xeon(r) Gold 6230 CPU @ 2.10GHz
+cpu_info:19:cpu_info19:brand	Intel(r) Xeon(r) Gold 6230 CPU @ 2.10GHz
+cpu_info:20:cpu_info20:brand	Intel(r) Xeon(r) Gold 6230 CPU @ 2.10GHz
+cpu_info:21:cpu_info21:brand	Intel(r) Xeon(r) Gold 6230 CPU @ 2.10GHz
+cpu_info:22:cpu_info22:brand	Intel(r) Xeon(r) Gold 6230 CPU @ 2.10GHz
+cpu_info:23:cpu_info23:brand	Intel(r) Xeon(r) Gold 6230 CPU @ 2.10GHz
+cpu_info:24:cpu_info24:brand	Intel(r) Xeon(r) Gold 6230 CPU @ 2.10GHz
+cpu_info:25:cpu_info25:brand	Intel(r) Xeon(r) Gold 6230 CPU @ 2.10GHz
+cpu_info:26:cpu_info26:brand	Intel(r) Xeon(r) Gold 6230 CPU @ 2.10GHz
+cpu_info:27:cpu_info27:brand	Intel(r) Xeon(r) Gold 6230 CPU @ 2.10GHz
+cpu_info:28:cpu_info28:brand	Intel(r) Xeon(r) Gold 6230 CPU @ 2.10GHz
+cpu_info:29:cpu_info29:brand	Intel(r) Xeon(r) Gold 6230 CPU @ 2.10GHz
+cpu_info:30:cpu_info30:brand	Intel(r) Xeon(r) Gold 6230 CPU @ 2.10GHz
+cpu_info:31:cpu_info31:brand	Intel(r) Xeon(r) Gold 6230 CPU @ 2.10GHz
+cpu_info:32:cpu_info32:brand	Intel(r) Xeon(r) Gold 6230 CPU @ 2.10GHz
+cpu_info:33:cpu_info33:brand	Intel(r) Xeon(r) Gold 6230 CPU @ 2.10GHz
+cpu_info:34:cpu_info34:brand	Intel(r) Xeon(r) Gold 6230 CPU @ 2.10GHz
+cpu_info:35:cpu_info35:brand	Intel(r) Xeon(r) Gold 6230 CPU @ 2.10GHz
+cpu_info:36:cpu_info36:brand	Intel(r) Xeon(r) Gold 6230 CPU @ 2.10GHz
+cpu_info:37:cpu_info37:brand	Intel(r) Xeon(r) Gold 6230 CPU @ 2.10GHz
+cpu_info:38:cpu_info38:brand	Intel(r) Xeon(r) Gold 6230 CPU @ 2.10GHz
+cpu_info:39:cpu_info39:brand	Intel(r) Xeon(r) Gold 6230 CPU @ 2.10GHz
+cpu_info:0:cpu_info0:chip_id	0
+cpu_info:1:cpu_info1:chip_id	0
+cpu_info:2:cpu_info2:chip_id	0
+cpu_info:3:cpu_info3:chip_id	0
+cpu_info:4:cpu_info4:chip_id	0
+cpu_info:5:cpu_info5:chip_id	0
+cpu_info:6:cpu_info6:chip_id	0
+cpu_info:7:cpu_info7:chip_id	0
+cpu_info:8:cpu_info8:chip_id	0
+cpu_info:9:cpu_info9:chip_id	0
+cpu_info:10:cpu_info10:chip_id	0
+cpu_info:11:cpu_info11:chip_id	0
+cpu_info:12:cpu_info12:chip_id	0
+cpu_info:13:cpu_info13:chip_id	0
+cpu_info:14:cpu_info14:chip_id	0
+cpu_info:15:cpu_info15:chip_id	0
+cpu_info:16:cpu_info16:chip_id	0
+cpu_info:17:cpu_info17:chip_id	0
+cpu_info:18:cpu_info18:chip_id	0
+cpu_info:19:cpu_info19:chip_id	0
+cpu_info:20:cpu_info20:chip_id	0
+cpu_info:21:cpu_info21:chip_id	0
+cpu_info:22:cpu_info22:chip_id	0
+cpu_info:23:cpu_info23:chip_id	0
+cpu_info:24:cpu_info24:chip_id	0
+cpu_info:25:cpu_info25:chip_id	0
+cpu_info:26:cpu_info26:chip_id	0
+cpu_info:27:cpu_info27:chip_id	0
+cpu_info:28:cpu_info28:chip_id	0
+cpu_info:29:cpu_info29:chip_id	0
+cpu_info:30:cpu_info30:chip_id	0
+cpu_info:31:cpu_info31:chip_id	0
+cpu_info:32:cpu_info32:chip_id	0
+cpu_info:33:cpu_info33:chip_id	0
+cpu_info:34:cpu_info34:chip_id	0
+cpu_info:35:cpu_info35:chip_id	0
+cpu_info:36:cpu_info36:chip_id	0
+cpu_info:37:cpu_info37:chip_id	0
+cpu_info:38:cpu_info38:chip_id	0
+cpu_info:39:cpu_info39:chip_id	0
+cpu_info:0:cpu_info0:clock_MHz	2100
+cpu_info:1:cpu_info1:clock_MHz	2100
+cpu_info:2:cpu_info2:clock_MHz	2100
+cpu_info:3:cpu_info3:clock_MHz	2100
+cpu_info:4:cpu_info4:clock_MHz	2100
+cpu_info:5:cpu_info5:clock_MHz	2100
+cpu_info:6:cpu_info6:clock_MHz	2100
+cpu_info:7:cpu_info7:clock_MHz	2100
+cpu_info:8:cpu_info8:clock_MHz	2100
+cpu_info:9:cpu_info9:clock_MHz	2100
+cpu_info:10:cpu_info10:clock_MHz	2100
+cpu_info:11:cpu_info11:clock_MHz	2100
+cpu_info:12:cpu_info12:clock_MHz	2100
+cpu_info:13:cpu_info13:clock_MHz	2100
+cpu_info:14:cpu_info14:clock_MHz	2100
+cpu_info:15:cpu_info15:clock_MHz	2100
+cpu_info:16:cpu_info16:clock_MHz	2100
+cpu_info:17:cpu_info17:clock_MHz	2100
+cpu_info:18:cpu_info18:clock_MHz	2100
+cpu_info:19:cpu_info19:clock_MHz	2100
+cpu_info:20:cpu_info20:clock_MHz	2100
+cpu_info:21:cpu_info21:clock_MHz	2100
+cpu_info:22:cpu_info22:clock_MHz	2100
+cpu_info:23:cpu_info23:clock_MHz	2100
+cpu_info:24:cpu_info24:clock_MHz	2100
+cpu_info:25:cpu_info25:clock_MHz	2100
+cpu_info:26:cpu_info26:clock_MHz	2100
+cpu_info:27:cpu_info27:clock_MHz	2100
+cpu_info:28:cpu_info28:clock_MHz	2100
+cpu_info:29:cpu_info29:clock_MHz	2100
+cpu_info:30:cpu_info30:clock_MHz	2100
+cpu_info:31:cpu_info31:clock_MHz	2100
+cpu_info:32:cpu_info32:clock_MHz	2100
+cpu_info:33:cpu_info33:clock_MHz	2100
+cpu_info:34:cpu_info34:clock_MHz	2100
+cpu_info:35:cpu_info35:clock_MHz	2100
+cpu_info:36:cpu_info36:clock_MHz	2100
+cpu_info:37:cpu_info37:clock_MHz	2100
+cpu_info:38:cpu_info38:clock_MHz	2100
+cpu_info:39:cpu_info39:clock_MHz	2100
+EOF
+            ;;
+        # Load average and process stats
+        unix:0:system_misc:avenrun_1min\ unix:0:system_misc:avenrun_5min\ unix:0:system_misc:avenrun_15min\ unix:0:system_misc:nproc)
+            cat <<EOF
+unix:0:system_misc:avenrun_1min	2042
+unix:0:system_misc:avenrun_5min	1970
+unix:0:system_misc:avenrun_15min	1958
+unix:0:system_misc:nproc	167
+EOF
+            ;;
+        # Context switches and interrupts
+        cpu:::pswitch\ cpu:::intr)
+            cat <<EOF
+cpu:0:sys:pswitch	15948540179
+cpu:1:sys:pswitch	21217703240
+cpu:0:sys:intr	71443655663
+cpu:1:sys:intr	45670462161
+EOF
+            ;;
+        *)
+            # Return empty for unknown queries
             ;;
     esac
 fi

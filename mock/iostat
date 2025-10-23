@@ -1,0 +1,16 @@
+#!/bin/bash
+
+if [[ "$1" == "-xnp" ]]; then
+    # Simulate extended iostat output
+    cat <<'EOF'
+extended device statistics
+    r/s    w/s   kr/s   kw/s wait actv wsvc_t asvc_t  %w  %b device
+    9.9   53.4   13.5  513.4  0.0  0.0    0.0    0.1   0   0 c4t1d0
+   11.7   57.0   15.2  519.7  0.0  0.0    0.0    0.1   0   0 c1t1d0
+   11.7   57.0   15.2  519.7  0.0  0.0    0.0    0.1   0   0 c3t1d0
+    9.8   53.4   13.5  513.4  0.0  0.0    0.0    0.1   0   0 c2t1d0
+    0.0    0.0    0.0    0.0  0.0  0.0    0.7    0.9   0   0 lofi1
+    0.0    0.0    0.0    0.0  0.0  0.0    0.0    0.0   0   0 ramdisk1
+   43.2   68.0   57.5 2066.2  0.3  0.0    2.4    0.3   0   0 zones
+EOF
+fi

@@ -1,0 +1,28 @@
+# OPTION ttl 0
+# HELP cn_memory_total_bytes Total physical memory in bytes
+# TYPE cn_memory_total_bytes gauge
+cn_memory_total_bytes	410883231744
+# HELP cn_memory_free_bytes Free physical memory in bytes
+# TYPE cn_memory_free_bytes gauge
+cn_memory_free_bytes	168299163648
+# HELP cn_memory_available_bytes Available memory (free + reclaimable) in bytes
+# TYPE cn_memory_available_bytes gauge
+cn_memory_available_bytes	169191186432
+# HELP cn_memory_pgpgin_total Pages paged in since boot
+# TYPE cn_memory_pgpgin_total counter
+cn_memory_pgpgin_total	20600
+# HELP cn_memory_pgpgout_total Pages paged out since boot
+# TYPE cn_memory_pgpgout_total counter
+cn_memory_pgpgout_total	4300
+# HELP cn_memory_scan_rate Page scan rate
+# TYPE cn_memory_scan_rate gauge
+cn_memory_scan_rate	0
+# HELP cn_swap_total_bytes Total swap space in bytes
+# TYPE cn_swap_total_bytes gauge
+cn_swap_total_bytes	411243114496
+# HELP cn_swap_used_bytes Used swap space in bytes
+# TYPE cn_swap_used_bytes gauge
+cn_swap_used_bytes	1172729856
+# HELP cn_swap_free_bytes Free swap space in bytes
+# TYPE cn_swap_free_bytes gauge
+cn_swap_free_bytes	410070384640

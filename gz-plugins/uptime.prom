@@ -1,4 +1,7 @@
-#!/bin/bash
+#!/usr/bin/env bash
+
+# Set TTL to zero for accurate uptime measurements
+printf '# OPTION ttl 0\n'
 
 metric='uptime_seconds_total'
 

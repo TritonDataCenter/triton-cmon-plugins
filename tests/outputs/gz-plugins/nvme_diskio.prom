@@ -1,0 +1,37 @@
+# OPTION ttl 0
+# HELP cn_disk_reads_total Total disk read operations
+# TYPE cn_disk_reads_total counter
+cn_disk_reads_total{disk="c4t1d0"}	277341335
+# HELP cn_disk_writes_total Total disk write operations
+# TYPE cn_disk_writes_total counter
+cn_disk_writes_total{disk="c4t1d0"}	1502017154
+# HELP cn_disk_read_bytes_total Total bytes read from disk
+# TYPE cn_disk_read_bytes_total counter
+cn_disk_read_bytes_total{disk="c4t1d0"}	389529783296
+# HELP cn_disk_write_bytes_total Total bytes written to disk
+# TYPE cn_disk_write_bytes_total counter
+cn_disk_write_bytes_total{disk="c4t1d0"}	14776664804352
+# HELP cn_disk_read_time_seconds_total Total time spent reading from disk in seconds
+# TYPE cn_disk_read_time_seconds_total counter
+cn_disk_read_time_seconds_total{disk="c4t1d0"}	57632.862491066
+# HELP cn_disk_write_time_seconds_total Total time spent writing to disk in seconds
+# TYPE cn_disk_write_time_seconds_total counter
+cn_disk_write_time_seconds_total{disk="c4t1d0"}	562.675015111
+cn_disk_reads_total{disk="c1t1d0"}	330082970
+cn_disk_writes_total{disk="c1t1d0"}	1601856559
+cn_disk_read_bytes_total{disk="c1t1d0"}	437561932800
+cn_disk_write_bytes_total{disk="c1t1d0"}	14956815625216
+cn_disk_read_time_seconds_total{disk="c1t1d0"}	60898.750845620
+cn_disk_write_time_seconds_total{disk="c1t1d0"}	579.166640342
+cn_disk_reads_total{disk="c3t1d0"}	329973843
+cn_disk_writes_total{disk="c3t1d0"}	1600811614
+cn_disk_read_bytes_total{disk="c3t1d0"}	437876137472
+cn_disk_write_bytes_total{disk="c3t1d0"}	14956738658816
+cn_disk_read_time_seconds_total{disk="c3t1d0"}	60922.987082089
+cn_disk_write_time_seconds_total{disk="c3t1d0"}	604.246817372
+cn_disk_reads_total{disk="c2t1d0"}	276757149
+cn_disk_writes_total{disk="c2t1d0"}	1501687120
+cn_disk_read_bytes_total{disk="c2t1d0"}	389272784384
+cn_disk_write_bytes_total{disk="c2t1d0"}	14777321883648
+cn_disk_read_time_seconds_total{disk="c2t1d0"}	57679.800863083
+cn_disk_write_time_seconds_total{disk="c2t1d0"}	558.229047747
