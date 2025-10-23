@@ -16,7 +16,7 @@ if [[ -n "$TRACE" ]]; then
 fi
 
 # Get list of zones with all needed fields in parseable format
-zone_list=$(vmadm list -p -o uuid,alias,brand,state,ram,vcpus,quota,flexible_disk_size,max_swap,max_lwps,billing_id,owner_uuid 2>/dev/null || true)
+zone_list=$(vmadm list -p -o uuid,alias,brand,state,ram,vcpus,cpu_cap,quota,flexible_disk_size,max_swap,max_lwps,billing_id,owner_uuid 2>/dev/null || true)
 
 # shellcheck disable=SC2181
 if [ -z "$zone_list" ]; then
@@ -29,19 +29,21 @@ zone_info_lines=""
 zone_state_lines=""
 zone_memory_lines=""
 zone_vcpus_lines=""
+zone_cpu_cap_lines=""
 zone_disk_lines=""
 zone_flexible_disk_lines=""
 zone_swap_lines=""
 zone_lwps_lines=""
 
 # Process each zone (vmadm list -p outputs colon-separated fields)
-while IFS=: read -r uuid alias brand state ram vcpus quota flexible_disk max_swap max_lwps billing_id owner_uuid; do
+while IFS=: read -r uuid alias brand state ram vcpus cpu_cap quota flexible_disk max_swap max_lwps billing_id owner_uuid; do
     # Handle empty/null values
     [ -z "$alias" ] && alias=""
     [ -z "$billing_id" ] && billing_id=""
     [ -z "$owner_uuid" ] && owner_uuid=""
     [ -z "$ram" ] && ram="0"
     [ -z "$vcpus" ] && vcpus="0"
+    [ -z "$cpu_cap" ] && cpu_cap="0"
     [ -z "$quota" ] && quota="0"
     [ -z "$flexible_disk" ] && flexible_disk="0"
     [ -z "$max_swap" ] && max_swap="0"
@@ -58,6 +60,11 @@ while IFS=: read -r uuid alias brand state ram vcpus quota flexible_disk max_swa
     # VCPUs
     if [ "$vcpus" != "0" ]; then
         zone_vcpus_lines="${zone_vcpus_lines}cn_zone_allocated_vcpus{uuid=\"${uuid}\"}\t${vcpus}\n"
+    fi
+
+    # CPU Cap
+    if [ "$cpu_cap" != "0" ]; then
+        zone_cpu_cap_lines="${zone_cpu_cap_lines}cn_zone_allocated_cpu_cap{uuid=\"${uuid}\"}\t${cpu_cap}\n"
     fi
 
     # Quota is in GiB, convert to bytes
@@ -119,6 +126,10 @@ printf '%b' "$zone_memory_lines"
 printf '# HELP cn_zone_allocated_vcpus vCPUs allocated to zone\n'
 printf '# TYPE cn_zone_allocated_vcpus gauge\n'
 printf '%b' "$zone_vcpus_lines"
+
+printf '# HELP cn_zone_allocated_cpu_cap cpu_cap allocated to zone\n'
+printf '# TYPE cn_zone_allocated_cpu_cap gauge\n'
+printf '%b' "$zone_cpu_cap_lines"
 
 printf '# HELP cn_zone_allocated_disk_bytes Disk quota allocated to zone in bytes\n'
 printf '# TYPE cn_zone_allocated_disk_bytes gauge\n'
