@@ -1,0 +1,106 @@
+#!/usr/bin/env bash
+
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
+# Copyright 2025 Edgecast Cloud LLC.
+
+set -o errexit
+set -o pipefail
+
+# shellcheck disable=SC2154
+if [[ -n "$TRACE" ]]; then
+    export PS4='[\D{%FT%TZ}] ${BASH_SOURCE}:${LINENO}: ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
+    set -o xtrace
+fi
+
+# Get all blkdev and sd stats from kstat
+stats=$(kstat -p "blkdev:::nread" \
+                 "blkdev:::nwritten" \
+                 "blkdev:::reads" \
+                 "blkdev:::writes" \
+                 "blkdev:::rtime" \
+                 "blkdev:::wtime" \
+                 "sd::/^sd[0-9]+$/:nread" \
+                 "sd::/^sd[0-9]+$/:nwritten" \
+                 "sd::/^sd[0-9]+$/:reads" \
+                 "sd::/^sd[0-9]+$/:writes" \
+                 "sd::/^sd[0-9]+$/:rtime" \
+                 "sd::/^sd[0-9]+$/:wtime" 2>/dev/null)
+
+# shellcheck disable=SC2181
+if [ -z "$stats" ]; then
+    # If kstat fails or returns no devices, exit silently
+    exit 0
+fi
+
+
+# Process all stats with AWK
+echo "$stats" | awk '
+
+# Parse kstat output: module:instance:name:stat value
+{
+    split($1, parts, ":")
+    module = parts[1]
+    instance = parts[2]
+    device = parts[3]
+    stat = parts[4]
+    value = $2
+
+    # Store stats by device
+    stats[device, stat] = value
+
+    # Track which devices we have seen
+    if (!(device in devices)) {
+        devices[device] = 1
+        device_order[++device_count] = device
+    }
+}
+
+END {
+    # Print all HELP and TYPE statements at the top
+    # Set TTL to 0 seconds to ensure accurate rate calculations
+    printf "# OPTION ttl 0\n"
+    printf "# HELP cn_disk_reads_total Total disk read operations\n"
+    printf "# TYPE cn_disk_reads_total counter\n"
+    printf "# HELP cn_disk_writes_total Total disk write operations\n"
+    printf "# TYPE cn_disk_writes_total counter\n"
+    printf "# HELP cn_disk_read_bytes_total Total bytes read from disk\n"
+    printf "# TYPE cn_disk_read_bytes_total counter\n"
+    printf "# HELP cn_disk_write_bytes_total Total bytes written to disk\n"
+    printf "# TYPE cn_disk_write_bytes_total counter\n"
+    printf "# HELP cn_disk_read_time_seconds_total Total time spent reading from disk in seconds\n"
+    printf "# TYPE cn_disk_read_time_seconds_total counter\n"
+    printf "# HELP cn_disk_write_time_seconds_total Total time spent writing to disk in seconds\n"
+    printf "# TYPE cn_disk_write_time_seconds_total counter\n"
+    # Output metrics for each device
+    for (i = 1; i <= device_count; i++) {
+        device = device_order[i]
+
+        nread = stats[device, "nread"]
+        nwritten = stats[device, "nwritten"]
+        reads = stats[device, "reads"]
+        writes = stats[device, "writes"]
+        rtime = stats[device, "rtime"]
+        wtime = stats[device, "wtime"]
+
+        # Skip if we do not have complete stats for this device
+        if (nread == "" || reads == "") {
+            continue
+        }
+
+        # Convert nanoseconds to seconds
+        rtime_seconds = rtime / 1000000000
+        wtime_seconds = wtime / 1000000000
+
+        # Output all metrics for this device
+        printf "cn_disk_reads_total{disk=\"%s\"}\t%s\n", device, reads
+        printf "cn_disk_writes_total{disk=\"%s\"}\t%s\n", device, writes
+        printf "cn_disk_read_bytes_total{disk=\"%s\"}\t%s\n", device, nread
+        printf "cn_disk_write_bytes_total{disk=\"%s\"}\t%s\n", device, nwritten
+        printf "cn_disk_read_time_seconds_total{disk=\"%s\"}\t%.9f\n", device, rtime_seconds
+        printf "cn_disk_write_time_seconds_total{disk=\"%s\"}\t%.9f\n", device, wtime_seconds
+    }
+}
+'
