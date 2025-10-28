@@ -42,8 +42,8 @@ EOF
                 echo "cpu:${i}:vm:pgscan	0"
             done
             ;;
-        # Network stats for igb0
-        link::igb0:*)
+        # Network stats for all interfaces
+        'link:::rbytes64 link:::obytes64 link:::ipackets64 link:::opackets64 link:::ierrors link:::oerrors link:::norcvbuf link:::noxmtbuf link:::ifspeed link:::link_state')
             cat <<EOF
 link:0:igb0:rbytes64	9945603321958
 link:0:igb0:obytes64	6172629005
@@ -55,11 +55,6 @@ link:0:igb0:norcvbuf	32
 link:0:igb0:noxmtbuf	0
 link:0:igb0:ifspeed	1000000000
 link:0:igb0:link_state	1
-EOF
-            ;;
-        # Network stats for cxgbe0
-        link::cxgbe0:*)
-            cat <<EOF
 link:0:cxgbe0:rbytes64	0
 link:0:cxgbe0:obytes64	54970235
 link:0:cxgbe0:ipackets64	0
