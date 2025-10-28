@@ -54,45 +54,32 @@ while IFS=: read -r uuid alias brand state ram vcpus cpu_cap cpu_shares quota fl
 
     # Build per-zone allocation metrics
     # RAM is in MiB, convert to bytes
-    if [ "$ram" != "0" ]; then
-        ram_bytes=$((ram * 1048576))
-        zone_memory_lines="${zone_memory_lines}cn_zone_allocated_memory_bytes{uuid=\"${uuid}\"}\t${ram_bytes}\n"
-    fi
+    ram_bytes=$((ram * 1048576))
+    zone_memory_lines="${zone_memory_lines}cn_zone_allocated_memory_bytes{uuid=\"${uuid}\"}\t${ram_bytes}\n"
 
     # VCPUs
-    if [ "$vcpus" != "0" ]; then
-        zone_vcpus_lines="${zone_vcpus_lines}cn_zone_allocated_vcpus{uuid=\"${uuid}\"}\t${vcpus}\n"
-    fi
+    zone_vcpus_lines="${zone_vcpus_lines}cn_zone_allocated_vcpus{uuid=\"${uuid}\"}\t${vcpus}\n"
 
     # CPU Cap
-    if [ "$cpu_cap" != "0" ]; then
-        zone_cpu_cap_lines="${zone_cpu_cap_lines}cn_zone_allocated_cpu_cap{uuid=\"${uuid}\"}\t${cpu_cap}\n"
-    fi
+    zone_cpu_cap_lines="${zone_cpu_cap_lines}cn_zone_allocated_cpu_cap{uuid=\"${uuid}\"}\t${cpu_cap}\n"
+
     # CPU Shares
     zone_cpu_shares_lines="${zone_cpu_shares_lines}cn_zone_allocated_cpu_shares{uuid=\"${uuid}\"}\t${cpu_shares}\n"
 
     # Quota is in GiB, convert to bytes
-    if [ "$quota" != "0" ]; then
-        quota_bytes=$((quota * 1073741824))
-        zone_quota_lines="${zone_quota_lines}cn_zone_allocated_quota_bytes{uuid=\"${uuid}\"}\t${quota_bytes}\n"
-    fi
+    quota_bytes=$((quota * 1073741824))
+    zone_quota_lines="${zone_quota_lines}cn_zone_allocated_quota_bytes{uuid=\"${uuid}\"}\t${quota_bytes}\n"
 
     # Flexible disk size is in MiB, convert to bytes
-    if [ "$flexible_disk" != "0" ]; then
-        flexible_disk_bytes=$((flexible_disk * 1048576))
-        zone_flexible_disk_lines="${zone_flexible_disk_lines}cn_zone_allocated_flexible_disk_bytes{uuid=\"${uuid}\"}\t${flexible_disk_bytes}\n"
-    fi
+    flexible_disk_bytes=$((flexible_disk * 1048576))
+    zone_flexible_disk_lines="${zone_flexible_disk_lines}cn_zone_allocated_flexible_disk_bytes{uuid=\"${uuid}\"}\t${flexible_disk_bytes}\n"
 
     # Max swap is in MiB, convert to bytes
-    if [ "$max_swap" != "0" ]; then
-        max_swap_bytes=$((max_swap * 1048576))
-        zone_swap_lines="${zone_swap_lines}cn_zone_allocated_swap_bytes{uuid=\"${uuid}\"}\t${max_swap_bytes}\n"
-    fi
+    max_swap_bytes=$((max_swap * 1048576))
+    zone_swap_lines="${zone_swap_lines}cn_zone_allocated_swap_bytes{uuid=\"${uuid}\"}\t${max_swap_bytes}\n"
 
     # Max lwps
-    if [ "$max_lwps" != "0" ]; then
-        zone_lwps_lines="${zone_lwps_lines}cn_zone_allocated_max_lwps{uuid=\"${uuid}\"}\t${max_lwps}\n"
-    fi
+    zone_lwps_lines="${zone_lwps_lines}cn_zone_allocated_max_lwps{uuid=\"${uuid}\"}\t${max_lwps}\n"
 
     # Build zone info line
     zone_info_lines="${zone_info_lines}cn_zone_info{uuid=\"${uuid}\",alias=\"${alias}\",brand=\"${brand}\",billing_id=\"${billing_id}\",owner_uuid=\"${owner_uuid}\"}\t1\n"
@@ -134,6 +121,10 @@ printf '%b' "$zone_vcpus_lines"
 printf '# HELP cn_zone_allocated_cpu_cap cpu_cap allocated to zone\n'
 printf '# TYPE cn_zone_allocated_cpu_cap gauge\n'
 printf '%b' "$zone_cpu_cap_lines"
+
+printf '# HELP cn_zone_allocated_cpu_shares cpu_shares allocated to zone\n'
+printf '# TYPE cn_zone_allocated_cpu_shares gauge\n'
+printf '%b' "$zone_cpu_shares_lines"
 
 printf '# HELP cn_zone_allocated_quota_bytes Disk quota allocated to zone in bytes\n'
 printf '# TYPE cn_zone_allocated_quota_bytes gauge\n'

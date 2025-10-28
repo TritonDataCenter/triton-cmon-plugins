@@ -15,6 +15,9 @@ cn_zone_allocated_memory_bytes{uuid="9bb5e00f-e19a-40b5-9076-62151ff363dd"}	6845
 # HELP cn_zone_allocated_vcpus vCPUs allocated to zone
 # TYPE cn_zone_allocated_vcpus gauge
 cn_zone_allocated_vcpus{uuid="1f4204e6-03a4-4096-9db8-f84f1b5b4b8d"}	1
+cn_zone_allocated_vcpus{uuid="a83d6dcb-ee7f-41bd-9ee9-0b9577f9b999"}	0
+cn_zone_allocated_vcpus{uuid="aa69a499-dd8e-4459-8bfc-4899c94bab14"}	0
+cn_zone_allocated_vcpus{uuid="41e6a368-fa01-40a6-a44f-f450c532c203"}	0
 cn_zone_allocated_vcpus{uuid="7a02ed46-24d5-4669-abba-c0748b42fc64"}	4
 cn_zone_allocated_vcpus{uuid="83025959-de12-47ae-997c-55e22fdfb444"}	8
 cn_zone_allocated_vcpus{uuid="856b2712-6938-4fa1-91a1-a2a169da8fd2"}	8
@@ -64,6 +67,9 @@ cn_zone_allocated_quota_bytes{uuid="9bb5e00f-e19a-40b5-9076-62151ff363dd"}	10737
 # HELP cn_zone_allocated_flexible_disk_bytes Flexible disk size allocated to zone in bytes
 # TYPE cn_zone_allocated_flexible_disk_bytes gauge
 cn_zone_allocated_flexible_disk_bytes{uuid="1f4204e6-03a4-4096-9db8-f84f1b5b4b8d"}	40802189312
+cn_zone_allocated_flexible_disk_bytes{uuid="a83d6dcb-ee7f-41bd-9ee9-0b9577f9b999"}	0
+cn_zone_allocated_flexible_disk_bytes{uuid="aa69a499-dd8e-4459-8bfc-4899c94bab14"}	0
+cn_zone_allocated_flexible_disk_bytes{uuid="41e6a368-fa01-40a6-a44f-f450c532c203"}	0
 cn_zone_allocated_flexible_disk_bytes{uuid="7a02ed46-24d5-4669-abba-c0748b42fc64"}	161061273600
 cn_zone_allocated_flexible_disk_bytes{uuid="83025959-de12-47ae-997c-55e22fdfb444"}	1181116006400
 cn_zone_allocated_flexible_disk_bytes{uuid="856b2712-6938-4fa1-91a1-a2a169da8fd2"}	322122547200
