@@ -101,6 +101,65 @@ blkdev:2:blkdev2:wtime	604246817372
 blkdev:3:blkdev3:wtime	558229047747
 EOF
             ;;
+        # Disk I/O stats for sd
+        'blkdev:::nread blkdev:::nwritten blkdev:::reads blkdev:::writes blkdev:::rtime blkdev:::wtime sd::/^sd[0-9]+$/:nread sd::/^sd[0-9]+$/:nwritten sd::/^sd[0-9]+$/:reads sd::/^sd[0-9]+$/:writes sd::/^sd[0-9]+$/:rtime sd::/^sd[0-9]+$/:wtime')
+        cat << EOF
+blkdev:0:blkdev0:nread  10984960
+blkdev:0:blkdev0:nwritten       0
+blkdev:0:blkdev0:reads  484
+blkdev:0:blkdev0:writes 0
+blkdev:0:blkdev0:rtime  100080231
+blkdev:0:blkdev0:wtime  104565
+sd:0:sd0:nread  27816228
+sd:1:sd1:nread  52500
+sd:2:sd2:nread  12260176
+sd:3:sd3:nread  10795792
+sd:4:sd4:nread  10337040
+sd:5:sd5:nread  9309904
+sd:6:sd6:nread  8842960
+sd:7:sd7:nread  8848592
+sd:0:sd0:nwritten       128174080
+sd:1:sd1:nwritten       0
+sd:2:sd2:nwritten       0
+sd:3:sd3:nwritten       0
+sd:4:sd4:nwritten       0
+sd:5:sd5:nwritten       0
+sd:6:sd6:nwritten       0
+sd:7:sd7:nwritten       0
+sd:0:sd0:reads  2033
+sd:1:sd1:reads  62
+sd:2:sd2:reads  435
+sd:3:sd3:reads  434
+sd:4:sd4:reads  396
+sd:5:sd5:reads  365
+sd:6:sd6:reads  370
+sd:7:sd7:reads  344
+sd:0:sd0:writes 23190
+sd:1:sd1:writes 99
+sd:2:sd2:writes 141
+sd:3:sd3:writes 135
+sd:4:sd4:writes 135
+sd:5:sd5:writes 127
+sd:6:sd6:writes 125
+sd:7:sd7:writes 127
+sd:0:sd0:rtime  3259987582
+sd:1:sd1:rtime  0
+sd:2:sd2:rtime  21490481
+sd:3:sd3:rtime  22331459
+sd:4:sd4:rtime  21484382
+sd:5:sd5:rtime  19220101
+sd:6:sd6:rtime  21651675
+sd:7:sd7:rtime  12207347
+sd:0:sd0:wtime  420281681
+sd:1:sd1:wtime  0
+sd:2:sd2:wtime  2784728
+sd:3:sd3:wtime  2985341
+sd:4:sd4:wtime  28625882
+sd:5:sd5:wtime  25952631
+sd:6:sd6:wtime  1895183
+sd:7:sd7:wtime  9999569
+EOF
+            ;;
         # CPU detailed stats
         cpu::sys:cpu_nsec_user\ cpu::sys:cpu_nsec_kernel\ cpu::sys:cpu_nsec_idle\ cpu::sys:cpu_nsec_intr\ cpu_info:::brand\ cpu_info:::chip_id\ cpu_info:::clock_MHz)
             cat <<EOF
