@@ -86,7 +86,7 @@ END {
         wtime = stats[device, "wtime"]
 
         # Skip if we do not have complete stats for this device
-        if (nread == "" || reads == "") {
+        if (nread == "" || nwritten == "" || reads == "" || writes == "" || rtime == "" || wtime == "") {
             continue
         }
 
