@@ -1,6 +1,0 @@
-{
-    "cpu_detailed.prom": {
-        "timeout": 5000,
-        "ttl": 0
-    }
-}
