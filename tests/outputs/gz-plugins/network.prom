@@ -1,33 +1,33 @@
 # OPTION ttl 0
 # HELP cn_network_receive_bytes_total Network bytes received on interface
 # TYPE cn_network_receive_bytes_total counter
-cn_network_receive_bytes_total{interface="igb0"}	9945603321958
 # HELP cn_network_transmit_bytes_total Network bytes transmitted on interface
 # TYPE cn_network_transmit_bytes_total counter
-cn_network_transmit_bytes_total{interface="igb0"}	6172629005
 # HELP cn_network_receive_packets_total Network packets received on interface
 # TYPE cn_network_receive_packets_total counter
-cn_network_receive_packets_total{interface="igb0"}	28940220713
 # HELP cn_network_transmit_packets_total Network packets transmitted on interface
 # TYPE cn_network_transmit_packets_total counter
-cn_network_transmit_packets_total{interface="igb0"}	16294949
 # HELP cn_network_receive_errors_total Network receive errors on interface
 # TYPE cn_network_receive_errors_total counter
-cn_network_receive_errors_total{interface="igb0"}	5
 # HELP cn_network_transmit_errors_total Network transmit errors on interface
 # TYPE cn_network_transmit_errors_total counter
-cn_network_transmit_errors_total{interface="igb0"}	0
 # HELP cn_network_receive_drops_total Network receive buffer drops on interface
 # TYPE cn_network_receive_drops_total counter
-cn_network_receive_drops_total{interface="igb0"}	32
 # HELP cn_network_transmit_drops_total Network transmit buffer drops on interface
 # TYPE cn_network_transmit_drops_total counter
-cn_network_transmit_drops_total{interface="igb0"}	0
 # HELP cn_network_link_speed_bytes Network interface link speed in bytes per second
 # TYPE cn_network_link_speed_bytes gauge
-cn_network_link_speed_bytes{interface="igb0"}	125000000
 # HELP cn_network_link_up Network interface link status (1=up, 0=down)
 # TYPE cn_network_link_up gauge
+cn_network_receive_bytes_total{interface="igb0"}	9945603321958
+cn_network_transmit_bytes_total{interface="igb0"}	6172629005
+cn_network_receive_packets_total{interface="igb0"}	28940220713
+cn_network_transmit_packets_total{interface="igb0"}	16294949
+cn_network_receive_errors_total{interface="igb0"}	5
+cn_network_transmit_errors_total{interface="igb0"}	0
+cn_network_receive_drops_total{interface="igb0"}	32
+cn_network_transmit_drops_total{interface="igb0"}	0
+cn_network_link_speed_bytes{interface="igb0"}	125000000
 cn_network_link_up{interface="igb0"}	1
 cn_network_receive_bytes_total{interface="cxgbe0"}	0
 cn_network_transmit_bytes_total{interface="cxgbe0"}	54970235

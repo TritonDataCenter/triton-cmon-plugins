@@ -1,26 +1,16 @@
 #!/bin/bash
 
-case "$1" in
-    show-phys)
-        if [[ "$2" == "-p" ]]; then
-            # Parseable output: LINK only
-            cat <<EOF
+case "$@" in
+    'show-vnic -p -o LINK')
+        cat <<EOF
+underlay0
+net0
+EOF
+        ;;
+    'show-phys -p -o LINK')
+        cat <<EOF
 igb0
 cxgbe0
-EOF
-        else
-            cat <<EOF
-LINK         MEDIA                STATE      SPEED    DUPLEX   DEVICE
-igb0         Ethernet             up         1000     full     igb0
-cxgbe0       Ethernet             down       0        unknown  cxgbe0
-EOF
-        fi
-        ;;
-    show-vnic)
-        cat <<EOF
-LINK         OVER       SPEED    MACADDRESS        MACADDRTYPE VID  ZONE
-underlay0    cxgbe1     100000   90:b8:d0:8c:ce:94 fixed       111  --
-net0         cxgbe1     0        90:b8:d0:25:a5:ac fixed       1474 f62b0465-d232-4a17-b312-25319236995c
 EOF
         ;;
 esac

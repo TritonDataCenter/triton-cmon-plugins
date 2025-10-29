@@ -24,112 +24,119 @@ if [ -z "$phys_interfaces" ]; then
     exit 0
 fi
 
-# Set TTL to 0 seconds to ensure accurate rate calculations
-printf '# OPTION ttl 0\n'
-# Process each physical interface
-for interface in $phys_interfaces; do
-    # Get network statistics from kstat
-    stats=$(kstat -p "link::${interface}:rbytes64" \
-                     "link::${interface}:obytes64" \
-                     "link::${interface}:ipackets64" \
-                     "link::${interface}:opackets64" \
-                     "link::${interface}:ierrors" \
-                     "link::${interface}:oerrors" \
-                     "link::${interface}:norcvbuf" \
-                     "link::${interface}:noxmtbuf" \
-                     "link::${interface}:ifspeed" \
-                     "link::${interface}:link_state" 2>/dev/null || true)
+# Get all network statistics from kstat at once
+stats=$(kstat -p "link:::rbytes64" \
+                 "link:::obytes64" \
+                 "link:::ipackets64" \
+                 "link:::opackets64" \
+                 "link:::ierrors" \
+                 "link:::oerrors" \
+                 "link:::norcvbuf" \
+                 "link:::noxmtbuf" \
+                 "link:::ifspeed" \
+                 "link:::link_state" 2>/dev/null || true)
 
-    if [ -z "$stats" ]; then
-        continue
-    fi
+# Get VNIC count (xargs trims whitespace from wc output)
+vnic_count=$(dladm show-vnic -p -o LINK 2>/dev/null | awk 'END {print NR}')
 
-    # Parse statistics
-    rbytes=$(echo "$stats" | grep 'rbytes64' | awk '{print $2}')
-    obytes=$(echo "$stats" | grep 'obytes64' | awk '{print $2}')
-    ipackets=$(echo "$stats" | grep 'ipackets64' | awk '{print $2}')
-    opackets=$(echo "$stats" | grep 'opackets64' | awk '{print $2}')
-    ierrors=$(echo "$stats" | grep 'ierrors' | awk '{print $2}')
-    oerrors=$(echo "$stats" | grep 'oerrors' | awk '{print $2}')
-    norcvbuf=$(echo "$stats" | grep 'norcvbuf' | awk '{print $2}')
-    noxmtbuf=$(echo "$stats" | grep 'noxmtbuf' | awk '{print $2}')
-    ifspeed=$(echo "$stats" | grep 'ifspeed' | awk '{print $2}')
-    link_state=$(echo "$stats" | grep 'link_state' | awk '{print $2}')
+# Process everything with AWK
+{
+    echo "$phys_interfaces"
+    echo "---"
+    echo "$stats"
+} | awk '
+/^---$/ {
+    mode = "stats"
+    next
+}
 
-    # Convert link_state (1=up, 0=down)
-    link_up=$link_state
+mode != "stats" && NF > 0 {
+    # Build list of valid physical interfaces
+    valid_ifaces[$0] = 1
+    next
+}
 
-    # Convert ifspeed from bits/sec to bytes/sec (like node_exporter)
-    speed_bytes=$((ifspeed / 8))
+mode == "stats" && NF > 0 {
+    # Parse kstat output: module:instance:name:stat value
+    split($1, parts, ":")
+    module = parts[1]
+    instance = parts[2]
+    interface = parts[3]
+    stat = parts[4]
+    value = $2
 
-    # Output metrics with interface label
-    # Only output HELP and TYPE once
-    if [ "$interface" = "$(echo "$phys_interfaces" | head -1)" ]; then
-        printf '# HELP cn_network_receive_bytes_total Network bytes received on interface\n'
-        printf '# TYPE cn_network_receive_bytes_total counter\n'
-    fi
-    printf 'cn_network_receive_bytes_total{interface="%s"}\t%d\n' "$interface" "$rbytes"
+    # Only process interfaces that are physical interfaces
+    if (interface in valid_ifaces) {
+        # Store stats by interface
+        stats[interface, stat] = value
 
-    if [ "$interface" = "$(echo "$phys_interfaces" | head -1)" ]; then
-        printf '# HELP cn_network_transmit_bytes_total Network bytes transmitted on interface\n'
-        printf '# TYPE cn_network_transmit_bytes_total counter\n'
-    fi
-    printf 'cn_network_transmit_bytes_total{interface="%s"}\t%d\n' "$interface" "$obytes"
+        # Track which interfaces we have seen
+        if (!(interface in interfaces_seen)) {
+            interfaces_seen[interface] = 1
+            interface_order[++interface_count] = interface
+        }
+    }
+}
 
-    if [ "$interface" = "$(echo "$phys_interfaces" | head -1)" ]; then
-        printf '# HELP cn_network_receive_packets_total Network packets received on interface\n'
-        printf '# TYPE cn_network_receive_packets_total counter\n'
-    fi
-    printf 'cn_network_receive_packets_total{interface="%s"}\t%d\n' "$interface" "$ipackets"
+END {
+    # Print all HELP and TYPE statements at the top
+    printf "# OPTION ttl 0\n"
+    printf "# HELP cn_network_receive_bytes_total Network bytes received on interface\n"
+    printf "# TYPE cn_network_receive_bytes_total counter\n"
+    printf "# HELP cn_network_transmit_bytes_total Network bytes transmitted on interface\n"
+    printf "# TYPE cn_network_transmit_bytes_total counter\n"
+    printf "# HELP cn_network_receive_packets_total Network packets received on interface\n"
+    printf "# TYPE cn_network_receive_packets_total counter\n"
+    printf "# HELP cn_network_transmit_packets_total Network packets transmitted on interface\n"
+    printf "# TYPE cn_network_transmit_packets_total counter\n"
+    printf "# HELP cn_network_receive_errors_total Network receive errors on interface\n"
+    printf "# TYPE cn_network_receive_errors_total counter\n"
+    printf "# HELP cn_network_transmit_errors_total Network transmit errors on interface\n"
+    printf "# TYPE cn_network_transmit_errors_total counter\n"
+    printf "# HELP cn_network_receive_drops_total Network receive buffer drops on interface\n"
+    printf "# TYPE cn_network_receive_drops_total counter\n"
+    printf "# HELP cn_network_transmit_drops_total Network transmit buffer drops on interface\n"
+    printf "# TYPE cn_network_transmit_drops_total counter\n"
+    printf "# HELP cn_network_link_speed_bytes Network interface link speed in bytes per second\n"
+    printf "# TYPE cn_network_link_speed_bytes gauge\n"
+    printf "# HELP cn_network_link_up Network interface link status (1=up, 0=down)\n"
+    printf "# TYPE cn_network_link_up gauge\n"
 
-    if [ "$interface" = "$(echo "$phys_interfaces" | head -1)" ]; then
-        printf '# HELP cn_network_transmit_packets_total Network packets transmitted on interface\n'
-        printf '# TYPE cn_network_transmit_packets_total counter\n'
-    fi
-    printf 'cn_network_transmit_packets_total{interface="%s"}\t%d\n' "$interface" "$opackets"
+    # Output metrics for each interface
+    for (i = 1; i <= interface_count; i++) {
+        interface = interface_order[i]
 
-    if [ "$interface" = "$(echo "$phys_interfaces" | head -1)" ]; then
-        printf '# HELP cn_network_receive_errors_total Network receive errors on interface\n'
-        printf '# TYPE cn_network_receive_errors_total counter\n'
-    fi
-    printf 'cn_network_receive_errors_total{interface="%s"}\t%d\n' "$interface" "$ierrors"
+        rbytes = stats[interface, "rbytes64"]
+        obytes = stats[interface, "obytes64"]
+        ipackets = stats[interface, "ipackets64"]
+        opackets = stats[interface, "opackets64"]
+        ierrors = stats[interface, "ierrors"]
+        oerrors = stats[interface, "oerrors"]
+        norcvbuf = stats[interface, "norcvbuf"]
+        noxmtbuf = stats[interface, "noxmtbuf"]
+        ifspeed = stats[interface, "ifspeed"]
+        link_state = stats[interface, "link_state"]
 
-    if [ "$interface" = "$(echo "$phys_interfaces" | head -1)" ]; then
-        printf '# HELP cn_network_transmit_errors_total Network transmit errors on interface\n'
-        printf '# TYPE cn_network_transmit_errors_total counter\n'
-    fi
-    printf 'cn_network_transmit_errors_total{interface="%s"}\t%d\n' "$interface" "$oerrors"
+        # Convert ifspeed from bits/sec to bytes/sec
+        speed_bytes = ifspeed / 8
 
-    if [ "$interface" = "$(echo "$phys_interfaces" | head -1)" ]; then
-        printf '# HELP cn_network_receive_drops_total Network receive buffer drops on interface\n'
-        printf '# TYPE cn_network_receive_drops_total counter\n'
-    fi
-    printf 'cn_network_receive_drops_total{interface="%s"}\t%d\n' "$interface" "$norcvbuf"
+        # Output all metrics for this interface
+        printf "cn_network_receive_bytes_total{interface=\"%s\"}\t%s\n", interface, rbytes
+        printf "cn_network_transmit_bytes_total{interface=\"%s\"}\t%s\n", interface, obytes
+        printf "cn_network_receive_packets_total{interface=\"%s\"}\t%s\n", interface, ipackets
+        printf "cn_network_transmit_packets_total{interface=\"%s\"}\t%s\n", interface, opackets
+        printf "cn_network_receive_errors_total{interface=\"%s\"}\t%s\n", interface, ierrors
+        printf "cn_network_transmit_errors_total{interface=\"%s\"}\t%s\n", interface, oerrors
+        printf "cn_network_receive_drops_total{interface=\"%s\"}\t%s\n", interface, norcvbuf
+        printf "cn_network_transmit_drops_total{interface=\"%s\"}\t%s\n", interface, noxmtbuf
+        printf "cn_network_link_speed_bytes{interface=\"%s\"}\t%s\n", interface, speed_bytes
+        printf "cn_network_link_up{interface=\"%s\"}\t%s\n", interface, link_state
+    }
 
-    if [ "$interface" = "$(echo "$phys_interfaces" | head -1)" ]; then
-        printf '# HELP cn_network_transmit_drops_total Network transmit buffer drops on interface\n'
-        printf '# TYPE cn_network_transmit_drops_total counter\n'
-    fi
-    printf 'cn_network_transmit_drops_total{interface="%s"}\t%d\n' "$interface" "$noxmtbuf"
+}
+'
 
-    if [ "$interface" = "$(echo "$phys_interfaces" | head -1)" ]; then
-        printf '# HELP cn_network_link_speed_bytes Network interface link speed in bytes per second\n'
-        printf '# TYPE cn_network_link_speed_bytes gauge\n'
-    fi
-    printf 'cn_network_link_speed_bytes{interface="%s"}\t%d\n' "$interface" "$speed_bytes"
-
-    if [ "$interface" = "$(echo "$phys_interfaces" | head -1)" ]; then
-        printf '# HELP cn_network_link_up Network interface link status (1=up, 0=down)\n'
-        printf '# TYPE cn_network_link_up gauge\n'
-    fi
-    printf 'cn_network_link_up{interface="%s"}\t%d\n' "$interface" "$link_up"
-done
-
-# Count VNICs (excluding header line)
-vnic_total=$(dladm show-vnic 2>/dev/null | tail -n +2 | wc -l || echo 0)
-# Trim whitespace
-vnic_total=$(echo "$vnic_total" | tr -d ' ')
-
+# Output VNIC count
 printf '# HELP cn_network_vnics Total number of VNICs configured\n'
 printf '# TYPE cn_network_vnics gauge\n'
-printf 'cn_network_vnics\t%d\n' "$vnic_total"
+printf 'cn_network_vnics\t%s\n' "$vnic_count"
